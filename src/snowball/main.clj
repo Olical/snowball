@@ -1,11 +1,9 @@
 (ns snowball.main
-  (:require [clojure.tools.logging :as log]
-            [clojure.tools.nrepl.server :as nrepl]
-            [cider.nrepl]))
-
-(defn start-nrepl! [port]
-  (nrepl/start-server :port port :handler (ns-resolve 'cider.nrepl 'cider-nrepl-handler))
-  (log/info "nREPL server started on" port))
+  (:require [taoensso.timbre :as log]
+            [snowball.nrepl :as nrepl]
+            [snowball.config :as config]))
 
 (defn -main []
-  (start-nrepl! 9001))
+  (nrepl/start! 9001)
+  (config/load! "config.edn")
+  (log/info "Everything's up and running!"))
