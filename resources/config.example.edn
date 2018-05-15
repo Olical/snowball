@@ -1,0 +1,4 @@
+;; Copy to config.edn and edit required.
+
+{:nrepl {:port 9001}
+ :discord {}}
