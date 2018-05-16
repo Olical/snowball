@@ -10,7 +10,7 @@
 (defn connect! [{:keys [token poll-ms]}]
   (when @client!
     (log/info "Logging out of existing client")
-    (.logout @client!))
+    (.. @client! (logout)))
 
   (log/info "Connecting to Discord")
   (->> (.. (ClientBuilder.)
@@ -20,7 +20,7 @@
 
   (log/info "Connected, waiting until ready, polls every" (str poll-ms "ms"))
   (loop []
-    (if (.isReady @client!)
+    (if (.. @client! (isReady))
       (log/info "Ready")
       (do
         (log/info "Not ready, sleeping for" (str poll-ms "ms"))
@@ -28,32 +28,32 @@
         (recur)))))
 
 (defn channels []
-  (seq (.getVoiceChannels @client!)))
+  (seq (.. @client! (getVoiceChannels))))
 
 (defn channel-users [channel]
-  (seq (.getConnectedUsers channel)))
+  (seq (.. channel (getConnectedUsers))))
 
 (defn current-channel []
-  (-> (.getConnectedVoiceChannels @client!)
+  (-> (.. @client! (getConnectedVoiceChannels))
       (seq)
       (first)))
 
 (defn leave! [channel]
-  (log/info "Joining" (.getName channel))
-  (.leave channel))
+  (log/info "Leaving" (.. channel (getName)))
+  (.. channel (leave)))
 
 (defn join! [channel]
-  (log/info "Leaving" (.getName channel))
-  (.join channel))
+  (log/info "Joining" (.. channel (getName)))
+  (.. channel (join)))
 
 (defn bot? [user]
-  (.isBot user))
+  (.. user (isBot)))
 
 (defn muted? [user]
   (let [voice-state (first (.. user (getVoiceStates) (values)))]
-    (or (.isMuted voice-state)
-        (.isSelfMuted voice-state)
-        (.isSuppressed voice-state))))
+    (or (.. voice-state (isMuted))
+        (.. voice-state (isSelfMuted))
+        (.. voice-state (isSuppressed)))))
 
 (defn has-speaking-users? [channel]
   (->> (channel-users channel)
