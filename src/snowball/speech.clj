@@ -8,7 +8,8 @@
             AudioConfig
             SynthesizeSpeechResponse
             SsmlVoiceGender
-            AudioEncoding]))
+            AudioEncoding]
+           java.io.FileOutputStream))
 
 (defonce client! (atom nil))
 (defonce voice! (atom nil))
@@ -38,8 +39,11 @@
     contents))
 
 (defn say! [text]
-  (-> (synthesize text)
-      (discord/play!)))
+  (.. (FileOutputStream. "out.mp3")
+      (write (.. (synthesize text) (toByteArray))))
+
+  #_(-> (synthesize text)
+        (discord/play!)))
 
 (comment
   (synthesize "hi")
