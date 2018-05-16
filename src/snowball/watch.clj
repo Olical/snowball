@@ -5,10 +5,10 @@
 (defonce watch-future! (atom nil))
 
 (defn upsert-channel! []
-  (let [desired-channel (->> (discord/channels!)
+  (let [desired-channel (->> (discord/channels)
                              (filter discord/has-speaking-users?)
                              (first))
-        current-channel (discord/current-channel!)]
+        current-channel (discord/current-channel)]
 
     (cond
       (and current-channel (nil? desired-channel))

@@ -27,13 +27,13 @@
         (Thread/sleep poll-ms)
         (recur)))))
 
-(defn channels! []
+(defn channels []
   (seq (.getVoiceChannels @client!)))
 
-(defn channel-users! [channel]
+(defn channel-users [channel]
   (seq (.getConnectedUsers channel)))
 
-(defn current-channel! []
+(defn current-channel []
   (-> (.getConnectedVoiceChannels @client!)
       (seq)
       (first)))
@@ -56,7 +56,7 @@
         (.isSuppressed voice-state))))
 
 (defn has-speaking-users? [channel]
-  (->> (channel-users! channel)
+  (->> (channel-users channel)
        (remove #(or (bot? %) (muted? %)))
        (seq)
        (boolean)))
