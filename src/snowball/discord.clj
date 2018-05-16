@@ -31,7 +31,7 @@
   (seq (.getVoiceChannels @client!)))
 
 (defn channel-users! [channel]
-  (seq (remove #(.isBot %) (.getConnectedUsers channel))))
+  (seq (.getConnectedUsers channel)))
 
 (defn current-channel! []
   (-> (.getConnectedVoiceChannels @client!)
@@ -45,3 +45,18 @@
 (defn join! [channel]
   (log/info "Leaving" (.getName channel))
   (.join channel))
+
+(defn bot? [user]
+  (.isBot user))
+
+(defn muted? [user]
+  (let [voice-state (first (.. user (getVoiceStates) (values)))]
+    (or (.isMuted voice-state)
+        (.isSelfMuted voice-state)
+        (.isSuppressed voice-state))))
+
+(defn has-speaking-users? [channel]
+  (->> (channel-users! channel)
+       (remove #(or (bot? %) (muted? %)))
+       (seq)
+       (boolean)))
