@@ -3,5 +3,7 @@
         org.clojure/tools.nrepl {:mvn/version "0.2.12"}
         cider/cider-nrepl {:mvn/version "0.17.0"}
         com.taoensso/timbre {:mvn/version "4.10.0"}
-        com.discord4j/Discord4J {:mvn/version "2.10.1"}}
+        com.discord4j/Discord4J {:mvn/version "2.10.1"}
+        com.google.cloud/google-cloud-texttospeech {:mvn/version "0.41.0-beta"}
+        net.sourceforge.argparse4j/argparse4j {:mvn/version "0.8.1"}}
  :mvn/repos {"spring-plugins" {:url "http://repo.spring.io/plugins-release/"}}}

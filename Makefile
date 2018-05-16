@@ -1,4 +1,4 @@
 .PHONY: run
 
 run:
-	clojure -m snowball.main
+	export GOOGLE_APPLICATION_CREDENTIALS="$(shell pwd)/keys/google.json"; clojure -m snowball.main
