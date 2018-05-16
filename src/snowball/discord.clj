@@ -23,7 +23,7 @@
     (if (.isReady @client!)
       (log/info "Ready")
       (do
-        (log/info "Not ready, sleeping for "(str poll-ms "ms"))
+        (log/info "Not ready, sleeping for" (str poll-ms "ms"))
         (Thread/sleep poll-ms)
         (recur)))))
 
