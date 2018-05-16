@@ -13,8 +13,11 @@
                              (first))
         current-channel (discord/current-channel!)]
     (cond
-      (and current-channel (nil? desired-channel)) (discord/leave! current-channel)
-      (and desired-channel (not= current-channel desired-channel)) (discord/join! desired-channel))))
+      (and current-channel (nil? desired-channel))
+      (discord/leave! current-channel)
+
+      (and desired-channel (not= current-channel desired-channel))
+      (discord/join! desired-channel))))
 
 (defn start! []
   (log/info "Starting voice channel user follow loop")

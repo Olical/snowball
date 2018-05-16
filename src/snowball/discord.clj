@@ -27,7 +27,7 @@
   (seq (.getVoiceChannels @client!)))
 
 (defn channel-users! [channel]
-  (remove #(.isBot %) (seq (.getConnectedUsers channel))))
+  (seq (remove #(.isBot %) (.getConnectedUsers channel))))
 
 (defn current-channel! []
   (-> (.getConnectedVoiceChannels @client!)
