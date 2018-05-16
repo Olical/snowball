@@ -1,9 +1,8 @@
-(ns snowball.follow
+(ns snowball.watch
   (:require [taoensso.timbre :as log]
             [snowball.discord :as discord]))
 
-(def check-delay-ms 5000)
-(defonce follower! (atom nil))
+(defonce watch-future! (atom nil))
 
 (defn check! []
   (let [desired-channel (->> (discord/channels!)
@@ -12,6 +11,7 @@
                                              (map first)))
                              (first))
         current-channel (discord/current-channel!)]
+
     (cond
       (and current-channel (nil? desired-channel))
       (discord/leave! current-channel)
@@ -19,11 +19,16 @@
       (and desired-channel (not= current-channel desired-channel))
       (discord/join! desired-channel))))
 
-(defn start! []
-  (log/info "Starting voice channel user follow loop")
+(defn start! [{:keys [poll-ms]}]
+  (when @watch-future!
+    (log/info "Killing existing watch loop")
+    (future-cancel @watch-future!))
+
+  (log/info "Starting watch loop, polls every" (str poll-ms "ms"))
+
   (->> (future
          (loop []
            (check!)
-           (Thread/sleep check-delay-ms)
+           (Thread/sleep poll-ms)
            (recur)))
-       (reset! follower!)))
+       (reset! watch-future!)))

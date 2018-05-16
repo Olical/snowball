@@ -1,4 +1,6 @@
 ;; Copy to config.edn and edit required.
 
 {:nrepl {:port 9001}
- :discord {:token "INSERT DISCORD BOT TOKEN"}}
+ :discord {:token "INSERT DISCORD BOT TOKEN"
+           :poll-ms 1000}
+ :watch {:poll-ms 5000}}
