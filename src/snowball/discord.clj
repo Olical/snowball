@@ -5,8 +5,11 @@
 ;; https://github.com/Discord4J/Discord4J
 ;; https://jitpack.io/com/github/Discord4J/Discord4J/2.10.1/javadoc/
 
+(defonce client! (atom nil))
+
 (defn connect! [{:keys [token]}]
   (log/info "Connecting to Discord")
-  (let [client (ClientBuilder.)]
-    (.withToken client token)
-    (.login client)))
+  (->> (.. (ClientBuilder.)
+           (withToken token)
+           (login))
+       (reset! client!)))
