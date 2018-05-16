@@ -12,4 +12,12 @@
   (->> (.. (ClientBuilder.)
            (withToken token)
            (login))
-       (reset! client!)))
+       (reset! client!))
+  (log/info "Connected, waiting until ready")
+  (loop []
+    (if (.isReady @client!)
+      (log/info "Ready")
+      (do
+        (log/info "Not ready, sleeping for 1s")
+        (Thread/sleep 1000)
+        (recur)))))
