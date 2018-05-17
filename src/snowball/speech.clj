@@ -18,27 +18,30 @@
 
 (defn init! []
   (log/info "Creating TTS client")
-  (->> (.. TextToSpeechClient (create))
+  (->> (TextToSpeechClient/create)
        (reset! client!))
 
   (log/info "Creating voice")
   (->> (.. VoiceSelectionParams
-           (newBuilder)
-           (setLanguageCode "en_gb")
-           (setSsmlGender (.. SsmlVoiceGender MALE))
-           (build))
+           newBuilder
+           (setLanguageCode "en_us")
+           (setSsmlGender SsmlVoiceGender/MALE)
+           build)
        (reset! voice!))
 
   (log/info "Creating audio config")
-  (->> (.. AudioConfig (newBuilder) (setAudioEncoding (.. AudioEncoding MP3)) (build))
+  (->> (.. AudioConfig
+           newBuilder
+           (setAudioEncoding AudioEncoding/MP3)
+           build)
        (reset! audio-config!)))
 
 (defn synthesize [text]
-  (let [input (.. SynthesisInput (newBuilder) (setText text) (build))
-        response (.. @client! (synthesizeSpeech input @voice! @audio-config!))
-        contents (.. response (getAudioContent))
-        input-stream (.. contents (newInput))]
-    (.. AudioSystem (getAudioInputStream input-stream))))
+  (let [input (.. SynthesisInput newBuilder (setText text) build)
+        response (.synthesizeSpeech @client! input @voice! @audio-config!)
+        contents (.getAudioContent response)
+        input-stream (.newInput contents)]
+    (AudioSystem/getAudioInputStream input-stream)))
 
 (defn say! [text]
   (-> (synthesize text)

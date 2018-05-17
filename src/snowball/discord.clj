@@ -12,17 +12,17 @@
 (defn connect! [{:keys [token poll-ms]}]
   (when @client!
     (log/info "Logging out of existing client")
-    (.. @client! (logout)))
+    (.logout @client!))
 
   (log/info "Connecting to Discord")
   (->> (.. (ClientBuilder.)
            (withToken token)
-           (login))
+           login)
        (reset! client!))
 
   (log/info "Connected, waiting until ready, polls every" (str poll-ms "ms"))
   (loop []
-    (if (.. @client! (isReady))
+    (if (.isReady @client!)
       (log/info "Ready")
       (do
         (log/info "Not ready, sleeping for" (str poll-ms "ms"))
@@ -30,32 +30,32 @@
         (recur)))))
 
 (defn channels []
-  (seq (.. @client! (getVoiceChannels))))
+  (seq (.getVoiceChannels @client!)))
 
 (defn channel-users [channel]
-  (seq (.. channel (getConnectedUsers))))
+  (seq (.getConnectedUsers channel)))
 
 (defn current-channel []
-  (-> (.. @client! (getConnectedVoiceChannels))
+  (-> (.getConnectedVoiceChannels @client!)
       (seq)
       (first)))
 
 (defn leave! [channel]
-  (log/info "Leaving" (.. channel (getName)))
-  (.. channel (leave)))
+  (log/info "Leaving" (.getName channel))
+  (.leave channel))
 
 (defn join! [channel]
-  (log/info "Joining" (.. channel (getName)))
-  (.. channel (join)))
+  (log/info "Joining" (.getName channel))
+  (.join channel))
 
 (defn bot? [user]
-  (.. user (isBot)))
+  (.isBot user))
 
 (defn muted? [user]
-  (let [voice-state (first (.. user (getVoiceStates) (values)))]
-    (or (.. voice-state (isMuted))
-        (.. voice-state (isSelfMuted))
-        (.. voice-state (isSuppressed)))))
+  (let [voice-state (first (.. user getVoiceStates values))]
+    (or (.isMuted voice-state)
+        (.isSelfMuted voice-state)
+        (.isSuppressed voice-state))))
 
 (defn has-speaking-users? [channel]
   (->> (channel-users channel)
@@ -64,9 +64,9 @@
        (boolean)))
 
 (defn guilds []
-  (seq (.. @client! (getGuilds))))
+  (seq (.getGuilds @client!)))
 
 (defn play! [audio]
-  (let [player (.. AudioPlayer (getAudioPlayerForGuild (first (guilds))))]
-    (.. player (clear))
-    (.. player (queue audio))))
+  (doto (AudioPlayer/getAudioPlayerForGuild (first (guilds)))
+    (.clear)
+    (.queue audio)))
