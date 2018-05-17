@@ -43,7 +43,3 @@
 (defn say! [text]
   (-> (synthesize text)
       (discord/play!)))
-
-(comment
-  (synthesize "hi")
-  (say! "Hi, I'm Snowball."))
