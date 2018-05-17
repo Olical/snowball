@@ -44,5 +44,6 @@
     (AudioSystem/getAudioInputStream input-stream)))
 
 (defn say! [message]
-  (-> (synthesize message)
-      (discord/play!)))
+  (future
+    (-> (synthesize message)
+        (discord/play!))))
