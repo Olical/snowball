@@ -68,4 +68,5 @@
 
 (defn play! [audio]
   (let [player (.. AudioPlayer (getAudioPlayerForGuild (first (guilds))))]
-    (.. player (clear) (queue audio))))
+    (.. player (clear))
+    (.. player (queue audio))))

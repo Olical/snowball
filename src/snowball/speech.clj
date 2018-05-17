@@ -9,7 +9,8 @@
             SynthesizeSpeechResponse
             SsmlVoiceGender
             AudioEncoding]
-           java.io.FileOutputStream))
+           java.io.FileOutputStream
+           javax.sound.sampled.AudioSystem))
 
 (defonce client! (atom nil))
 (defonce voice! (atom nil))
@@ -35,15 +36,13 @@
 (defn synthesize [text]
   (let [input (.. SynthesisInput (newBuilder) (setText text) (build))
         response (.. @client! (synthesizeSpeech input @voice! @audio-config!))
-        contents (.. response (getAudioContent))]
-    contents))
+        contents (.. response (getAudioContent))
+        input-stream (.. contents (newInput))]
+    (.. AudioSystem (getAudioInputStream input-stream))))
 
 (defn say! [text]
-  (.. (FileOutputStream. "out.mp3")
-      (write (.. (synthesize text) (toByteArray))))
-
-  #_(-> (synthesize text)
-        (discord/play!)))
+  (-> (synthesize text)
+      (discord/play!)))
 
 (comment
   (synthesize "hi")
