@@ -57,9 +57,12 @@
         (.isSelfMuted voice-state)
         (.isSuppressed voice-state))))
 
+(defn can-speak? [user]
+  (not (or (bot? user) (muted? user))))
+
 (defn has-speaking-users? [channel]
   (->> (channel-users channel)
-       (remove #(or (bot? %) (muted? %)))
+       (filter can-speak?)
        (seq)
        (boolean)))
 

@@ -36,13 +36,13 @@
            build)
        (reset! audio-config!)))
 
-(defn synthesize [text]
-  (let [input (.. SynthesisInput newBuilder (setText text) build)
+(defn synthesize [message]
+  (let [input (.. SynthesisInput newBuilder (setText (str message)) build)
         response (.synthesizeSpeech @client! input @voice! @audio-config!)
         contents (.getAudioContent response)
         input-stream (.newInput contents)]
     (AudioSystem/getAudioInputStream input-stream)))
 
-(defn say! [text]
-  (-> (synthesize text)
+(defn say! [message]
+  (-> (synthesize message)
       (discord/play!)))

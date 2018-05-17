@@ -1,11 +1,13 @@
 (ns snowball.watch
   (:require [taoensso.timbre :as log]
-            [snowball.watchers.presence :as presence]))
+            [snowball.watchers.presence :as presence]
+            [snowball.watchers.five-queue :as five-queue]))
 
 (defonce watch-future! (atom nil))
 
 (defn check-all-watchers! []
-  (presence/check!))
+  (presence/check!)
+  (five-queue/check!))
 
 (defn start! [{:keys [poll-ms]}]
   (when @watch-future!
