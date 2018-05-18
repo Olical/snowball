@@ -10,11 +10,12 @@
   (if-let [channel (discord/current-channel)]
     (let [channel-size (->> (discord/channel-users channel)
                             (filter discord/can-speak?)
-                            (count))]
-      (when (and (= channel-size 5)
-                 (< @previous-size! 5)
+                            (count))
+          target 5]
+      (when (and (= channel-size target)
+                 (< @previous-size! target)
                  (or (nil? @last-announcement!) (jt/after? (jt/instant) (jt/plus @last-announcement! (jt/minutes 1)))))
-        (speech/say! "That's the five queue!")
+        (speech/say! (str "That's the " target " queue!"))
         (reset! last-announcement! (jt/instant)))
       (reset! previous-size! channel-size))
     (do
