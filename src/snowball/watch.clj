@@ -1,5 +1,6 @@
 (ns snowball.watch
   (:require [taoensso.timbre :as log]
+            [snowball.util :as util]
             [snowball.watchers.presence :as presence]
             [snowball.watchers.five-queue :as five-queue]))
 
@@ -15,9 +16,5 @@
     (future-cancel @watch-future!))
 
   (log/info "Starting watch loop, polls every" (str poll-ms "ms"))
-  (->> (future
-         (loop []
-           (check-all-watchers!)
-           (Thread/sleep poll-ms)
-           (recur)))
+  (->> (future (util/poll-while poll-ms (constantly true) check-all-watchers!))
        (reset! watch-future!)))

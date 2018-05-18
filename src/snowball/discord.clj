@@ -1,5 +1,6 @@
 (ns snowball.discord
-  (:require [taoensso.timbre :as log])
+  (:require [taoensso.timbre :as log]
+            [snowball.util :as util])
   (:import sx.blah.discord.api.ClientBuilder
            sx.blah.discord.util.audio.AudioPlayer))
 
@@ -23,14 +24,9 @@
            login)
        (reset! client!))
 
-  (log/info "Connected, waiting until ready, polls every" (str poll-ms "ms"))
-  (loop []
-    (if (ready?)
-      (log/info "Ready")
-      (do
-        (log/info "Not ready, sleeping for" (str poll-ms "ms"))
-        (Thread/sleep poll-ms)
-        (recur)))))
+  (log/info "Connected, waiting until ready")
+  (util/poll-while poll-ms #(not (ready?)) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
+  (log/info "Ready"))
 
 (defn channels []
   (seq (.getVoiceChannels @client!)))
