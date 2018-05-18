@@ -6,8 +6,7 @@
             [snowball.config :as config])
   (:import [sx.blah.discord.api ClientBuilder]
            [sx.blah.discord.util.audio AudioPlayer]
-           [sx.blah.discord.api.events IListener]
-           [sx.blah.discord.handle.impl.events.shard DisconnectedEvent]))
+           [sx.blah.discord.api.events IListener]))
 
 (defonce client! (atom nil))
 (defonce player! (atom nil))
