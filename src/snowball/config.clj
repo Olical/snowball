@@ -6,12 +6,13 @@
 
 (defonce value! (atom nil))
 
-(defn load! [path]
-  (log/info "Loading config from" path)
-  (->> (io/resource path)
-       (slurp)
-       (edn/read-string)
-       (reset! value!)))
+(defn init! []
+  (let [path "config.edn"]
+    (log/info "Loading config from" path)
+    (->> (io/resource path)
+         (slurp)
+         (edn/read-string)
+         (reset! value!))))
 
 (defn get [& path]
   (get-in @value! path))

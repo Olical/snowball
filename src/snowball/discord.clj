@@ -29,16 +29,17 @@
     (util/poll-while poll-ms #(not (ready?)) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
     (log/info "Ready")))
 
-(defn connect! [{:keys [token]}]
+(defn init! []
   (when @client!
     (log/info "Logging out of existing client")
     (.logout @client!))
 
   (log/info "Connecting to Discord")
-  (->> (.. (ClientBuilder.)
-           (withToken token)
-           login)
-       (reset! client!))
+  (let [token (config/get :discord :token)]
+    (->> (.. (ClientBuilder.)
+             (withToken token)
+             login)
+         (reset! client!)))
 
   (.registerListener
     (.getDispatcher @client!)

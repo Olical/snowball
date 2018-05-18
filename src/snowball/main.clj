@@ -7,9 +7,9 @@
             [snowball.speech :as speech]))
 
 (defn -main []
-  (config/load! "config.edn")
-  (nrepl/start! (config/get :nrepl))
-  (discord/connect! (config/get :discord))
-  (watch/start! (config/get :watch))
+  (config/init!)
+  (nrepl/init!)
+  (discord/init!)
+  (watch/init!)
   (speech/init!)
   (log/info "Everything's up and running!"))
