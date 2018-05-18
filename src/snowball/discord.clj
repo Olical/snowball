@@ -4,8 +4,11 @@
             [camel-snake-kebab.core :as csk]
             [snowball.util :as util]
             [snowball.config :as config])
-  (:import [sx.blah.discord.api ClientBuilder]
+  (:import [java.io FileOutputStream ByteArrayInputStream]
+           [javax.sound.sampled AudioSystem]
+           [sx.blah.discord.api ClientBuilder]
            [sx.blah.discord.util.audio AudioPlayer]
+           [sx.blah.discord.handle.audio IAudioReceiver]
            [sx.blah.discord.api.events IListener]))
 
 (defonce client! (atom nil))
@@ -102,3 +105,27 @@
   (poll-until-ready)
   (when-let [channel (current-channel)]
     (leave! channel)))
+
+(defn audio-manager []
+  (-> (guilds) (first) (.getAudioManager)))
+
+(defn create-user-stream [target-user]
+  (let [am (audio-manager)
+        stream (FileOutputStream. "user-audio.wav")
+        receiver (reify IAudioReceiver
+                   (receive [this audio current-user _ _]
+                     (when (= target-user current-user)
+                       (.write stream audio))))]
+    (.subscribeReceiver am receiver)
+    {:receiver receiver
+     :stream stream}))
+
+(defn destroy-user-stream [{:keys [stream receiver]}]
+  (let [am (audio-manager)]
+    (.unsubscribeReceiver am receiver)
+    (.close stream)))
+
+(comment
+  (def me (second (channel-users (current-channel))))
+  (def s (create-user-stream me))
+  (destroy-user-stream s))

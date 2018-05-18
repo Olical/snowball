@@ -1,16 +1,16 @@
 (ns snowball.speech
   (:require [taoensso.timbre :as log]
             [snowball.discord :as discord])
-  (:import [com.google.cloud.texttospeech.v1beta1
+  (:import [java.io FileOutputStream]
+           [javax.sound.sampled AudioSystem]
+           [com.google.cloud.texttospeech.v1beta1
             TextToSpeechClient
             SynthesisInput
             VoiceSelectionParams
             AudioConfig
             SynthesizeSpeechResponse
             SsmlVoiceGender
-            AudioEncoding]
-           [java.io FileOutputStream]
-           [javax.sound.sampled AudioSystem]))
+            AudioEncoding]))
 
 (defonce client! (atom nil))
 (defonce voice! (atom nil))
