@@ -1,14 +1,17 @@
 (ns snowball.discord
   (:require [taoensso.timbre :as log]
             [snowball.util :as util])
-  (:import sx.blah.discord.api.ClientBuilder
-           sx.blah.discord.util.audio.AudioPlayer))
+  (:import [sx.blah.discord.api ClientBuilder]
+           [sx.blah.discord.util.audio AudioPlayer]))
 
 ;; https://github.com/Discord4J/Discord4J
 ;; https://jitpack.io/com/github/Discord4J/Discord4J/2.10.1/javadoc/
 
 (defonce client! (atom nil))
 (defonce player! (atom nil))
+
+(reify EventListener
+  (handle ))
 
 (defn ready? []
   (.isReady @client!))

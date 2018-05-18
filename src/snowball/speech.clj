@@ -9,8 +9,8 @@
             SynthesizeSpeechResponse
             SsmlVoiceGender
             AudioEncoding]
-           java.io.FileOutputStream
-           javax.sound.sampled.AudioSystem))
+           [java.io FileOutputStream]
+           [javax.sound.sampled AudioSystem]))
 
 (defonce client! (atom nil))
 (defonce voice! (atom nil))

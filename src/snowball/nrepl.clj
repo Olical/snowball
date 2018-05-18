@@ -1,7 +1,7 @@
 (ns snowball.nrepl
   (:require [clojure.tools.nrepl.server :as nrepl]
             [taoensso.timbre :as log]
-            cider.nrepl))
+            [cider.nrepl]))
 
 (defn start! [{:keys [port]}]
   (log/info "Starting nREPL server on port" port)
