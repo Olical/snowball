@@ -1,22 +1,36 @@
 (ns snowball.discord
-  (:require [taoensso.timbre :as log]
-            [snowball.util :as util])
+  (:require [clojure.string :as str]
+            [taoensso.timbre :as log]
+            [camel-snake-kebab.core :as csk]
+            [snowball.util :as util]
+            [snowball.config :as config])
   (:import [sx.blah.discord.api ClientBuilder]
-           [sx.blah.discord.util.audio AudioPlayer]))
-
-;; https://github.com/Discord4J/Discord4J
-;; https://jitpack.io/com/github/Discord4J/Discord4J/2.10.1/javadoc/
+           [sx.blah.discord.util.audio AudioPlayer]
+           [sx.blah.discord.api.events IListener]
+           [sx.blah.discord.handle.impl.events.shard DisconnectedEvent]))
 
 (defonce client! (atom nil))
 (defonce player! (atom nil))
 
-(reify EventListener
-  (handle ))
+(defn event->keyword [c]
+  (-> (str c)
+      (str/split #"\.")
+      (last)
+      (str/replace #"Event.*$" "")
+      (csk/->kebab-case-keyword)))
 
-(defn ready? []
-  (.isReady @client!))
+(defmulti handle-event! event->keyword)
+(defmethod handle-event! :default [event])
 
-(defn connect! [{:keys [token poll-ms]}]
+(declare ready?)
+
+(defn poll-until-ready []
+  (let [poll-ms (config/get :discord :poll-ms)]
+    (log/info "Connected, waiting until ready")
+    (util/poll-while poll-ms #(not (ready?)) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
+    (log/info "Ready")))
+
+(defn connect! [{:keys [token]}]
   (when @client!
     (log/info "Logging out of existing client")
     (.logout @client!))
@@ -27,9 +41,13 @@
            login)
        (reset! client!))
 
-  (log/info "Connected, waiting until ready")
-  (util/poll-while poll-ms #(not (ready?)) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
-  (log/info "Ready"))
+  (.registerListener
+    (.getDispatcher @client!)
+    (reify IListener
+      (handle [this event]
+        (handle-event! event))))
+
+  (poll-until-ready))
 
 (defn channels []
   (seq (.getVoiceChannels @client!)))
@@ -53,6 +71,9 @@
 (defn bot? [user]
   (.isBot user))
 
+(defn ready? []
+  (.isReady @client!))
+
 (defn muted? [user]
   (let [voice-state (first (.. user getVoiceStates values))]
     (or (.isMuted voice-state)
@@ -75,3 +96,9 @@
   (doto (AudioPlayer/getAudioPlayerForGuild (first (guilds)))
     (.clear)
     (.queue audio)))
+
+(defmethod handle-event! :reconnect-success [event]
+  (log/info "Reconnection detected, leaving any existing voice channels to avoid weird state")
+  (poll-until-ready)
+  (when-let [channel (current-channel)]
+    (leave! channel)))
