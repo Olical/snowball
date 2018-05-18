@@ -9,6 +9,9 @@
 (defonce client! (atom nil))
 (defonce player! (atom nil))
 
+(defn ready? []
+  (.isReady @client!))
+
 (defn connect! [{:keys [token poll-ms]}]
   (when @client!
     (log/info "Logging out of existing client")
@@ -22,7 +25,7 @@
 
   (log/info "Connected, waiting until ready, polls every" (str poll-ms "ms"))
   (loop []
-    (if (.isReady @client!)
+    (if (ready?)
       (log/info "Ready")
       (do
         (log/info "Not ready, sleeping for" (str poll-ms "ms"))
