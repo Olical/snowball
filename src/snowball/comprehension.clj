@@ -12,7 +12,9 @@
 
 (defn handle-audio! [{:keys [user audio]}]
   (when-not (discord/bot? user)
-    (.write @stream! audio 0 (count audio))))
+    (try
+      (.write @stream! audio 0 (count audio))
+      (catch Exception e))))
 
 (defn init! []
   (when @subscription!
