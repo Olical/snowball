@@ -4,7 +4,8 @@
             [snowball.nrepl :as nrepl]
             [snowball.discord :as discord]
             [snowball.watch :as watch]
-            [snowball.speech :as speech]))
+            [snowball.speech :as speech]
+            [snowball.comprehension :as comprehension]))
 
 (defn -main []
   (config/init!)
@@ -12,4 +13,5 @@
   (discord/init!)
   (watch/init!)
   (speech/init!)
+  (comprehension/init!)
   (log/info "Everything's up and running!"))
