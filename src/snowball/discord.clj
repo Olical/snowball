@@ -4,9 +4,7 @@
             [camel-snake-kebab.core :as csk]
             [snowball.util :as util]
             [snowball.config :as config])
-  (:import [java.io FileOutputStream ByteArrayInputStream]
-           [javax.sound.sampled AudioSystem]
-           [sx.blah.discord.api ClientBuilder]
+  (:import [sx.blah.discord.api ClientBuilder]
            [sx.blah.discord.util.audio AudioPlayer]
            [sx.blah.discord.handle.audio IAudioReceiver]
            [sx.blah.discord.api.events IListener]))
