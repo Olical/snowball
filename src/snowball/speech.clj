@@ -1,8 +1,7 @@
 (ns snowball.speech
   (:require [taoensso.timbre :as log]
             [snowball.discord :as discord])
-  (:import [java.io FileOutputStream]
-           [javax.sound.sampled AudioSystem]
+  (:import [javax.sound.sampled AudioSystem]
            [com.google.cloud.texttospeech.v1beta1
             TextToSpeechClient
             SynthesisInput
