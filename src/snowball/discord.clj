@@ -107,7 +107,7 @@
 (defn audio-manager []
   (-> (guilds) (first) (.getAudioManager)))
 
-(defn create-receiver [f]
+(defn subscribe-audio [f]
   (let [am (audio-manager)
         receiver (reify IAudioReceiver
                    (receive [this audio user seq-char timestamp]
@@ -118,10 +118,6 @@
     (.subscribeReceiver am receiver)
     receiver))
 
-(defn destroy-receiver [receiver]
+(defn unsubscribe-audio [receiver]
   (let [am (audio-manager)]
     (.unsubscribeReceiver am receiver)))
-
-(comment
-  (def s (create-receiver (fn [x] (println x))))
-  (destroy-receiver s))
