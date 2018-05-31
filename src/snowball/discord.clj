@@ -110,11 +110,11 @@
 (defn subscribe-audio! [f]
   (let [am (audio-manager)
         subscription (reify IAudioReceiver
-                   (receive [this audio user seq-char timestamp]
-                     (f {:audio audio
-                         :user user
-                         :seq-char seq-char
-                         :timestamp timestamp})))]
+                       (receive [this audio user seq-char timestamp]
+                         (f {:audio audio
+                             :user user
+                             :seq-char seq-char
+                             :timestamp timestamp})))]
     (.subscribeReceiver am subscription)
     subscription))
 
