@@ -13,5 +13,7 @@
   (discord/init!)
   (watch/init!)
   (speech/init!)
-  (comprehension/init!)
+
+  ;; TODO Turn back on when I have working audio streams.
+  ; (comprehension/init!)
   (log/info "Everything's up and running!"))
