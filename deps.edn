@@ -1,6 +1,6 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.9.0"}
-        org.clojure/tools.nrepl {:mvn/version "0.2.12"}
+        org.clojure/tools.nrepl {:mvn/version "0.2.13"}
         cider/cider-nrepl {:mvn/version "0.17.0"}
         com.taoensso/timbre {:mvn/version "4.10.0"}
         com.discord4j/Discord4J {:mvn/version "2.10.1"}
@@ -8,6 +8,6 @@
         net.sourceforge.argparse4j/argparse4j {:mvn/version "0.8.1"}
         clojure.java-time {:mvn/version "0.3.2"}
         camel-snake-kebab {:mvn/version "0.4.0"}
-        edu.cmu.sphinx/sphinx4-core {:mvn/version "5prealpha-SNAPSHOT"}
-        edu.cmu.sphinx/sphinx4-data {:mvn/version "5prealpha-SNAPSHOT"}}
+        net.sf.phat/sphinx4-core {:mvn/version "5prealpha"}
+        net.sf.phat/sphinx4-data {:mvn/version "5prealpha"}}
  :mvn/repos {"spring-plugins" {:url "http://repo.spring.io/plugins-release/"}}}
