@@ -1,8 +1,8 @@
 (ns snowball.speech
   (:require [taoensso.timbre :as log]
-            [snowball.discord :as discord])
-  (:import [javax.sound.sampled AudioSystem]
-           [com.google.cloud.texttospeech.v1beta1
+            [snowball.discord :as discord]
+            [snowball.audio :as audio])
+  (:import [com.google.cloud.texttospeech.v1beta1
             TextToSpeechClient
             SynthesisInput
             VoiceSelectionParams
@@ -40,7 +40,7 @@
         response (.synthesizeSpeech @client! input @voice! @audio-config!)
         contents (.getAudioContent response)
         input-stream (.newInput contents)]
-    (AudioSystem/getAudioInputStream input-stream)))
+    (audio/input-stream input-stream)))
 
 (defn say! [message]
   (future
