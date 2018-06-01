@@ -40,9 +40,12 @@
         response (.synthesizeSpeech @client! input @voice! @audio-config!)
         contents (.getAudioContent response)
         input-stream (.newInput contents)]
-    (audio/input-stream input-stream)))
+    (audio/input->audio input-stream)))
 
 (defn say! [message]
   (future
     (-> (synthesize message)
         (discord/play!))))
+
+(comment
+  (say! "Hasta la vista, baby."))

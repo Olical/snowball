@@ -1,10 +1,8 @@
 (ns snowball.comprehension
   (:require [taoensso.timbre :as log]
-            [snowball.discord :as discord])
-  (:import [java.io PipedInputStream PipedOutputStream]
-           [edu.cmu.sphinx.api Configuration StreamSpeechRecognizer]))
-
-(def stream-size 1000)
+            [snowball.discord :as discord]
+            [snowball.stream :as stream])
+  (:import [edu.cmu.sphinx.api Configuration StreamSpeechRecognizer]))
 
 (defonce subscription! (atom nil)) 
 (defonce sphinx! (atom nil))
@@ -13,7 +11,7 @@
 (defn handle-audio! [{:keys [user audio]}]
   (when-not (discord/bot? user)
     (try
-      (.write @stream! audio 0 (count audio))
+      (stream/write @stream! audio)
       (catch Exception e))))
 
 (defn init! []
@@ -33,15 +31,15 @@
   (reset! subscription! (discord/subscribe-audio! #(handle-audio! %)))
 
   (log/info "Booting CMUSphinx")
-  (let [stream (PipedOutputStream.)
+  (let [output-stream (stream/output)
         sphinx (StreamSpeechRecognizer.
                  (doto (Configuration.)
                    (.setAcousticModelPath "resource:/edu/cmu/sphinx/models/en-us/en-us")
                    (.setDictionaryPath "resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict")
                    (.setLanguageModelPath "resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin")))]
     (reset! sphinx! sphinx)
-    (reset! stream! stream)
-    (.startRecognition sphinx (PipedInputStream. stream stream-size))))
+    (reset! stream! output-stream)
+    (.startRecognition sphinx (stream/input output-stream))))
 
 ;; TODO Make sure the audio format is correct. Bitrate may need tweaking?
 ;; https://cmusphinx.github.io/wiki/tutorialsphinx4/

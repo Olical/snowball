@@ -3,7 +3,9 @@
             [taoensso.timbre :as log]
             [camel-snake-kebab.core :as csk]
             [snowball.util :as util]
-            [snowball.config :as config])
+            [snowball.config :as config]
+            [snowball.stream :as stream]
+            [snowball.audio :as audio])
   (:import [sx.blah.discord.api ClientBuilder]
            [sx.blah.discord.util.audio AudioPlayer]
            [sx.blah.discord.handle.audio IAudioReceiver]
@@ -121,3 +123,18 @@
 (defn unsubscribe-audio! [subscription]
   (let [am (audio-manager)]
     (.unsubscribeReceiver am subscription)))
+
+(comment
+  (def out (stream/byte-array-output))
+
+  (defn handler [{:keys [audio user]}]
+    (when-not (bot? user)
+      (stream/write out audio)))
+
+  (unsubscribe-audio! sub)
+  (def sub (subscribe-audio! (fn [event] (handler event))))
+
+  (audio/write
+    (audio/bytes->audio (stream/->bytes out)
+                        (.getBitrate (current-channel)))
+    (clojure.java.io/output-stream "out.wav")))
