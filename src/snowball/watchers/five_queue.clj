@@ -1,5 +1,6 @@
 (ns snowball.watchers.five-queue
   (:require [java-time :as jt]
+            [taoensso.timbre :as log]
             [snowball.discord :as discord]
             [snowball.speech :as speech]))
 
@@ -13,9 +14,10 @@
                             (count))
           target 5]
       (when (and (= channel-size target)
-                 (< @previous-size! target)
-                 (or (nil? @last-announcement!) (jt/after? (jt/instant) (jt/plus @last-announcement! (jt/minutes 1)))))
+                 (or (nil? @previous-size!) (< @previous-size! target))
+                 (or (nil? @last-announcement!) (jt/after? (jt/instant) (jt/plus @last-announcement! (jt/hours 1)))))
         (speech/say! (str "That's the " target " queue!"))
+        (log/info "Announced the five queue")
         (reset! last-announcement! (jt/instant)))
       (reset! previous-size! channel-size))
     (do
