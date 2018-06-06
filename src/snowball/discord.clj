@@ -127,12 +127,8 @@
 (comment
   (def out (stream/byte-array-output))
 
-  (def previous! (atom 0))
-
-  (defn handler [{:keys [audio user timestamp]}]
+  (defn handler [{:keys [user audio]}]
     (when-not (bot? user)
-      (println (- timestamp @previous!))
-      (reset! previous! timestamp)
       (stream/write out audio)))
 
   (unsubscribe-audio! sub)
