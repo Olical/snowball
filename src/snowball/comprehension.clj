@@ -41,9 +41,6 @@
     (reset! stream! output-stream)
     (.startRecognition sphinx (stream/input output-stream))))
 
-;; TODO Make sure the audio format is correct. Bitrate may need tweaking?
-;; https://cmusphinx.github.io/wiki/tutorialsphinx4/
-
 (comment
   (def result (.getResult @sphinx!))
   (.getHypothesis result))

@@ -15,3 +15,10 @@ Written in Clojure, feel free to fork and mess with it if you can work out how t
  * [ ] Actual bot functionality using the comprehension and synthesis of speech developed earlier
 
 ![](images/snowball.png)
+
+## Notes
+
+ * Discord returns audio in `48KHz 16bit stereo signed BigEndian PCM`
+ * Sphinx requires `RIFF (little-endian) data, WAVE audio, Microsoft PCM, 16 bit, mono 16000  Hz`
+ * https://cmusphinx.github.io/wiki/tutorialsphinx4/
+ * https://stackoverflow.com/questions/44772319/converting-raw-pcm-sound-java
