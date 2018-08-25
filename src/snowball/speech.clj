@@ -48,4 +48,4 @@
         (discord/play!))))
 
 (comment
-  (say! "Hasta la vista, baby."))
+  (say! "woof"))
