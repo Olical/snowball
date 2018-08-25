@@ -135,6 +135,5 @@
   (def sub (subscribe-audio! (fn [event] (handler event))))
 
   (audio/write
-    (audio/bytes->audio (stream/->bytes out)
-                        (.getBitrate (current-channel)))
+    (audio/bytes->audio (stream/->bytes out))
     (clojure.java.io/output-stream "out.wav")))

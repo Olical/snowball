@@ -13,11 +13,9 @@
 (defn input->audio [input-stream]
   (AudioSystem/getAudioInputStream input-stream))
 
-(defn bytes->audio [bs bitrate]
+(defn bytes->audio [bs]
   (AudioInputStream. (ByteArrayInputStream. bs)
-                     (AudioFormat. bitrate
-                                   java.lang.Byte/SIZE
-                                   1 true false)
+                     (AudioFormat. 48000 16 2 true true)
                      (count bs)))
 
 (defn write [audio-stream target]
