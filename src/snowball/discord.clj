@@ -134,6 +134,12 @@
   (unsubscribe-audio! sub)
   (def sub (subscribe-audio! (fn [event] (handler event))))
 
+  ;; This is from Discord and can be sent directly to Google Speech API.
+  (audio/write
+    (audio/bytes->audio (stream/->bytes out))
+    (clojure.java.io/output-stream "out.wav"))
+
+  ;; This is (will be) the downsampled version that can be sent to Sphinx for keyword detection.
   (audio/write
     (audio/bytes->audio (stream/->bytes out))
     (clojure.java.io/output-stream "out.wav")))
