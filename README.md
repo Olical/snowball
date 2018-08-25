@@ -9,9 +9,9 @@ Written in Clojure, feel free to fork and mess with it if you can work out how t
  * [x] Connecting to Discord
  * [x] Joining and leaving voice channels automatically when there are users around
  * [x] Synthesising speech using Google's API and sending it to a voice channel
- * [ ] Receiving audio - I can subscribe to audio but sticking the byte arrays together and writing to a WAV file yields weird noises
- * [ ] Comprehension of audio with CMU Sphinx for a keyword
- * [ ] Sending audio after a keyword off to Google for recognition
+ * [x] Receiving audio into a file (just interim until I can pipe through Sphinx / Google Speech API)
+ * [ ] Comprehension of audio with CMU Sphinx for a keyword (requires downsampling to 16kHz and flipping BigEndian to LittleEndian)
+ * [ ] Sending audio after a keyword off to Google for recognition (can use Discord's native 48kHz BigEndian)
  * [ ] Actual bot functionality using the comprehension and synthesis of speech developed earlier
 
 ![](images/snowball.png)
