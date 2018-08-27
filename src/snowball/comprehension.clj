@@ -42,5 +42,6 @@
     (.startRecognition sphinx (stream/input output-stream))))
 
 (comment
+  (init!)
   (def result (.getResult @sphinx!))
   (.getHypothesis result))

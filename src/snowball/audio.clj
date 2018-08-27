@@ -21,9 +21,8 @@
 (defn bytes->sphinx-audio [bs-raw]
   (let [bs (->> bs-raw
                 (partition 2)
-                (take-nth 2)
-                (take-nth 3)
-                (map reverse)
+                (into [] (comp (take-nth 6)
+                               (map reverse)))
                 (flatten)
                 (byte-array))]
     (AudioInputStream. (ByteArrayInputStream. bs)
