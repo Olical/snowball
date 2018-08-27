@@ -136,10 +136,10 @@
 
   ;; This is from Discord and can be sent directly to Google Speech API.
   (audio/write
-    (audio/bytes->audio (stream/->bytes out))
-    (clojure.java.io/output-stream "out.wav"))
+    (audio/bytes->discord-audio (stream/->bytes out))
+    (clojure.java.io/output-stream "discord.wav"))
 
-  ;; This is (will be) the downsampled version that can be sent to Sphinx for keyword detection.
+  ;; This is the downsampled version that can be sent to Sphinx for keyword detection.
   (audio/write
-    (audio/bytes->audio (stream/->bytes out))
-    (clojure.java.io/output-stream "out.wav")))
+    (audio/bytes->sphinx-audio (stream/->bytes out))
+    (clojure.java.io/output-stream "sphinx.wav")))
