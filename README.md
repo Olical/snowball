@@ -14,12 +14,11 @@ Written in Clojure, feel free to fork and mess with it if you can work out how t
  * [ ] Sending audio after a keyword off to Google for recognition (can use Discord's native 48kHz BigEndian)
  * [ ] Actual bot functionality using the comprehension and synthesis of speech developed earlier
 
-## Configuration
+## Prerequisites
 
-Before you can boot Snowball you'll need to create the following files:
-
- * `resources/config.edn` - there's an example file in the same directory.
- * `keys/google.json` - you can create a key file for your service account in your GCP dashboard.
+ * Create `resources/config.edn`, there's an example file in the same directory.
+ * Create `keys/google.json`, you can create a key file for your service account in your GCP dashboard.
+ * Ensure [pocketsphinx][] is installed, I installed it through the Arch User Repository locally.
 
 ## Notes for development
 
@@ -30,3 +29,4 @@ Before you can boot Snowball you'll need to create the following files:
 
 ![](images/snowball.png)
 
+[pocketsphinx]: https://github.com/cmusphinx/pocketsphinx
