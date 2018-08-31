@@ -112,11 +112,8 @@
 (defn subscribe-audio! [f]
   (let [am (audio-manager)
         subscription (reify IAudioReceiver
-                       (receive [this audio user seq-char timestamp]
-                         (f {:audio audio
-                             :user user
-                             :seq-char seq-char
-                             :timestamp timestamp})))]
+                       (receive [this audio user _ _]
+                         (f audio user)))]
     (.subscribeReceiver am subscription)
     subscription))
 
@@ -127,19 +124,19 @@
 (comment
   (def out (stream/byte-array-output))
 
-  (defn handler [{:keys [user audio]}]
+  (defn handler [audio user]
     (when-not (bot? user)
-      (stream/write out audio)))
+      (let [bs (->> audio
+                    (partition 2)
+                    (into [] (comp (take-nth 6)
+                                   (map reverse)))
+                    (flatten)
+                    (byte-array))]
+        (stream/write out bs))))
 
   (unsubscribe-audio! sub)
-  (def sub (subscribe-audio! (fn [event] (handler event))))
+  (def sub (subscribe-audio! handler))
 
-  ;; This is from Discord and can be sent directly to Google Speech API.
   (audio/write
-    (audio/bytes->discord-audio (stream/->bytes out))
-    (clojure.java.io/output-stream "discord.wav"))
-
-  ;; This is the downsampled version that can be sent to Sphinx for keyword detection.
-  (audio/write
-    (audio/bytes->sphinx-audio (stream/->bytes out))
-    (clojure.java.io/output-stream "sphinx.wav")))
+    (audio/stream->audio out)
+    (clojure.java.io/output-stream "out.wav")))

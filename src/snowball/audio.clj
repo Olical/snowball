@@ -1,5 +1,6 @@
 (ns snowball.audio
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [snowball.stream :as stream])
   (:import [java.io ByteArrayInputStream]
            [javax.sound.sampled
             AudioSystem
@@ -13,18 +14,8 @@
 (defn input->audio [input-stream]
   (AudioSystem/getAudioInputStream input-stream))
 
-(defn bytes->discord-audio [bs]
-  (AudioInputStream. (ByteArrayInputStream. bs)
-                     (AudioFormat. 48000 16 2 true true)
-                     (count bs)))
-
-(defn bytes->sphinx-audio [bs-raw]
-  (let [bs (->> bs-raw
-                (partition 2)
-                (into [] (comp (take-nth 6)
-                               (map reverse)))
-                (flatten)
-                (byte-array))]
+(defn stream->audio [s]
+  (let [bs (stream/->bytes s)]
     (AudioInputStream. (ByteArrayInputStream. bs)
                        (AudioFormat. 16000 16 1 true false)
                        (count bs))))
