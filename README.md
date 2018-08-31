@@ -14,11 +14,19 @@ Written in Clojure, feel free to fork and mess with it if you can work out how t
  * [ ] Sending audio after a keyword off to Google for recognition (can use Discord's native 48kHz BigEndian)
  * [ ] Actual bot functionality using the comprehension and synthesis of speech developed earlier
 
-![](images/snowball.png)
+## Configuration
 
-## Notes
+Before you can boot Snowball you'll need to create the following files:
+
+ * `resources/config.edn` - there's an example file in the same directory.
+ * `keys/google.json` - you can create a key file for your service account in your GCP dashboard.
+
+## Notes for development
 
  * Discord returns audio in `48KHz 16bit stereo signed BigEndian PCM`
  * Sphinx requires `RIFF (little-endian) data, WAVE audio, Microsoft PCM, 16 bit, mono 16000  Hz`
  * https://cmusphinx.github.io/wiki/tutorialsphinx4/
  * https://stackoverflow.com/questions/44772319/converting-raw-pcm-sound-java
+
+![](images/snowball.png)
+
