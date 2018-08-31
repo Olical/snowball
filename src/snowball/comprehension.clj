@@ -8,7 +8,7 @@
 (defonce sphinx! (atom nil))
 (defonce stream! (atom nil))
 
-(defn handle-audio! [{:keys [user audio]}]
+(defn handle-audio! [audio user]
   (when-not (discord/bot? user)
     (try
       (stream/write @stream! audio)
@@ -28,7 +28,7 @@
     (.close @stream!))
 
   (log/info "Subscribing to audio")
-  (reset! subscription! (discord/subscribe-audio! #(handle-audio! %)))
+  (reset! subscription! (discord/subscribe-audio! handle-audio!))
 
   (log/info "Booting CMUSphinx")
   (let [output-stream (stream/output)
