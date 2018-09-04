@@ -17,7 +17,7 @@ Written in Clojure, feel free to fork and mess with it if you can work out how t
 ## Prerequisites
 
  * Create `resources/config.edn`, there's an example file in the same directory.
- * Create `keys/google.json`, you can create a key file for your service account in your GCP dashboard.
+ * Create `resources/google.json`, you can create a key file for your service account in your GCP dashboard.
  * Ensure [pocketsphinx][] is installed, I installed it through the Arch User Repository locally.
 
 ## Notes for development
