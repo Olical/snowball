@@ -1,30 +1,34 @@
 (ns snowball.comprehension
-  (:require [taoensso.timbre :as log]
+  (:require [com.stuartsierra.component :as component]
+            [taoensso.timbre :as log]
             [snowball.discord :as discord]
             [snowball.stream :as stream]))
 
-(defonce subscription! (atom nil)) 
-(defonce stream! (atom nil))
-
-(defn handle-audio! [audio user]
+(defn handle-audio! [{:keys [stream]} audio user]
   (when-not (discord/bot? user)
-    (try
-      (stream/write @stream! audio)
-      (catch Exception e))))
+    (let [bs (->> audio
+                  (partition 2)
+                  (into [] (comp (take-nth 6)
+                                 (map reverse)))
+                  (flatten)
+                  (byte-array))]
+      (stream/write stream bs))))
 
-(defn init! []
-  (when @subscription!
+(defrecord Comprehension [discord]
+  component/Lifecycle
+
+  (start [this]
+    (log/info "Subscribing to audio")
+    (let [this (assoc this :stream (stream/byte-array-output))]
+      (assoc this :subscription (discord/subscribe-audio! discord (partial handle-audio! this)))))
+
+  (stop [{:keys [subscription stream] :as this}]
     (log/info "Unsubscribing from existing audio")
-    (discord/unsubscribe-audio! @subscription!))
+    (discord/unsubscribe-audio! discord subscription)
 
-  (when @stream!
     (log/info "Closing existing audio stream")
-    (.close @stream!))
+    (.close stream)
 
-  (log/info "Subscribing to audio")
-  (reset! subscription! (discord/subscribe-audio! handle-audio!))
-
-  (reset! stream! (stream/output)))
-
-(comment
-  (init!))
+    (assoc this
+           :subscription nil
+           :stream nil)))

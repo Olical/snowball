@@ -1,18 +1,14 @@
 (ns snowball.discord
   (:require [clojure.string :as str]
+            [com.stuartsierra.component :as component]
             [taoensso.timbre :as log]
             [camel-snake-kebab.core :as csk]
-            [snowball.util :as util]
             [snowball.config :as config]
-            [snowball.stream :as stream]
-            [snowball.audio :as audio])
+            [snowball.util :as util])
   (:import [sx.blah.discord.api ClientBuilder]
            [sx.blah.discord.util.audio AudioPlayer]
            [sx.blah.discord.handle.audio IAudioReceiver]
            [sx.blah.discord.api.events IListener]))
-
-(defonce client! (atom nil))
-(defonce player! (atom nil))
 
 (defn event->keyword [c]
   (-> (str c)
@@ -21,45 +17,51 @@
       (str/replace #"Event.*$" "")
       (csk/->kebab-case-keyword)))
 
-(defmulti handle-event! event->keyword)
-(defmethod handle-event! :default [event])
+(defmulti handle-event! (fn [_ c] (event->keyword c)))
+(defmethod handle-event! :default [_ _])
 
 (declare ready?)
 
-(defn poll-until-ready []
-  (let [poll-ms (config/get :discord :poll-ms)]
+(defn poll-until-ready [{:keys [config] :as discord}]
+  (let [poll-ms (config/get config :discord :poll-ms)]
     (log/info "Connected, waiting until ready")
-    (util/poll-while poll-ms (complement ready?) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
+    (util/poll-while poll-ms #(not (ready? discord)) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
     (log/info "Ready")))
 
-(defn init! []
-  (when @client!
+(defrecord Discord [config]
+  component/Lifecycle
+
+  (start [this]
+    (log/info "Connecting to Discord")
+    (let [token (config/get config :discord :token)
+          client (.. (ClientBuilder.)
+                     (withToken token)
+                     login)
+          this (assoc this :client client)]
+
+      (.registerListener
+        (.getDispatcher client)
+        (reify IListener
+          (handle [_ event]
+            (handle-event! this event))))
+
+      (poll-until-ready this)
+
+      this))
+
+  (stop [{:keys [client] :as this}]
     (log/info "Logging out of existing client")
-    (.logout @client!))
+    (.logout client)
+    (assoc this :client nil)))
 
-  (log/info "Connecting to Discord")
-  (let [token (config/get :discord :token)]
-    (->> (.. (ClientBuilder.)
-             (withToken token)
-             login)
-         (reset! client!)))
-
-  (.registerListener
-    (.getDispatcher @client!)
-    (reify IListener
-      (handle [this event]
-        (handle-event! event))))
-
-  (poll-until-ready))
-
-(defn channels []
-  (seq (.getVoiceChannels @client!)))
+(defn channels [{:keys [client]}]
+  (seq (.getVoiceChannels client)))
 
 (defn channel-users [channel]
   (seq (.getConnectedUsers channel)))
 
-(defn current-channel []
-  (-> (.getConnectedVoiceChannels @client!)
+(defn current-channel [{:keys [client]}]
+  (-> (.getConnectedVoiceChannels client)
       (seq)
       (first)))
 
@@ -74,8 +76,8 @@
 (defn bot? [user]
   (.isBot user))
 
-(defn ready? []
-  (.isReady @client!))
+(defn ready? [{:keys [client]}]
+  (.isReady client))
 
 (defn muted? [user]
   (let [voice-state (first (.. user getVoiceStates values))]
@@ -92,51 +94,31 @@
        (seq)
        (boolean)))
 
-(defn guilds []
-  (seq (.getGuilds @client!)))
+(defn guilds [{:keys [client]}]
+  (seq (.getGuilds client)))
 
-(defn play! [audio]
-  (doto (AudioPlayer/getAudioPlayerForGuild (first (guilds)))
+(defn play! [discord audio]
+  (doto (AudioPlayer/getAudioPlayerForGuild (first (guilds discord)))
     (.clear)
     (.queue audio)))
 
-(defmethod handle-event! :reconnect-success [event]
+(defmethod handle-event! :reconnect-success [discord event]
   (log/info "Reconnection detected, leaving any existing voice channels to avoid weird state")
-  (poll-until-ready)
-  (when-let [channel (current-channel)]
+  (poll-until-ready discord)
+  (when-let [channel (current-channel discord)]
     (leave! channel)))
 
-(defn audio-manager []
-  (-> (guilds) (first) (.getAudioManager)))
+(defn audio-manager [discord]
+  (-> (guilds discord) (first) (.getAudioManager)))
 
-(defn subscribe-audio! [f]
-  (let [am (audio-manager)
+(defn subscribe-audio! [discord f]
+  (let [am (audio-manager discord)
         subscription (reify IAudioReceiver
-                       (receive [this audio user _ _]
+                       (receive [_ audio user _ _]
                          (f audio user)))]
     (.subscribeReceiver am subscription)
     subscription))
 
-(defn unsubscribe-audio! [subscription]
-  (let [am (audio-manager)]
+(defn unsubscribe-audio! [discord subscription]
+  (let [am (audio-manager discord)]
     (.unsubscribeReceiver am subscription)))
-
-(comment
-  (def out (stream/byte-array-output))
-
-  (defn handler [audio user]
-    (when-not (bot? user)
-      (let [bs (->> audio
-                    (partition 2)
-                    (into [] (comp (take-nth 6)
-                                   (map reverse)))
-                    (flatten)
-                    (byte-array))]
-        (stream/write out bs))))
-
-  (unsubscribe-audio! sub)
-  (def sub (subscribe-audio! handler))
-
-  (audio/write
-    (audio/stream->audio out)
-    (clojure.java.io/output-stream "out.wav")))

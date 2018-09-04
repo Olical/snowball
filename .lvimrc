@@ -1,1 +1,2 @@
-autocmd FileType clojure nnoremap <buffer> <silent> <localleader>rC :FireplaceConnect nrepl://localhost:9001 %{getcwd()}<cr>
+let g:scotch_stop = "(snowball.main/stop!)"
+let g:scotch_start = "(snowball.main/start!)"

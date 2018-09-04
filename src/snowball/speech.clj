@@ -1,5 +1,6 @@
 (ns snowball.speech
-  (:require [taoensso.timbre :as log]
+  (:require [com.stuartsierra.component :as component]
+            [taoensso.timbre :as log]
             [snowball.discord :as discord]
             [snowball.audio :as audio])
   (:import [com.google.cloud.texttospeech.v1beta1
@@ -11,41 +12,43 @@
             SsmlVoiceGender
             AudioEncoding]))
 
-(defonce client! (atom nil))
-(defonce voice! (atom nil))
-(defonce audio-config! (atom nil))
+(defrecord Speech [discord]
+  component/Lifecycle
 
-(defn init! []
-  (log/info "Creating TTS client")
-  (->> (TextToSpeechClient/create)
-       (reset! client!))
+  (start [this]
+    (log/info "Starting up speech client")
+    (assoc this
+           :client (TextToSpeechClient/create)
+           :voice (.. VoiceSelectionParams
+                      newBuilder
+                      (setLanguageCode "en_us")
+                      (setSsmlGender SsmlVoiceGender/MALE)
+                      build)
+           :audio-config (.. AudioConfig
+                             newBuilder
+                             (setAudioEncoding AudioEncoding/MP3)
+                             build)))
 
-  (log/info "Creating voice")
-  (->> (.. VoiceSelectionParams
-           newBuilder
-           (setLanguageCode "en_us")
-           (setSsmlGender SsmlVoiceGender/MALE)
-           build)
-       (reset! voice!))
+  (stop [{:keys [client] :as this}]
+    (log/info "Shutting down speech client")
+    (.close client)
+    (assoc this
+           :client nil
+           :voice nil
+           :audio-config nil)))
 
-  (log/info "Creating audio config")
-  (->> (.. AudioConfig
-           newBuilder
-           (setAudioEncoding AudioEncoding/MP3)
-           build)
-       (reset! audio-config!)))
-
-(defn synthesize [message]
+(defn synthesise [{:keys [client voice audio-config]} message]
   (let [input (.. SynthesisInput newBuilder (setText (str message)) build)
-        response (.synthesizeSpeech @client! input @voice! @audio-config!)
+        response (.synthesizeSpeech client input voice audio-config)
         contents (.getAudioContent response)
         input-stream (.newInput contents)]
     (audio/input->audio input-stream)))
 
-(defn say! [message]
+(defn say! [speech discord message]
   (future
-    (-> (synthesize message)
-        (discord/play!))))
+    (->> (synthesise speech message)
+         (discord/play! discord))))
 
 (comment
-  (say! "woof"))
+  (let [{:keys [speech discord]} @snowball.main/system!]
+    (say! speech discord "hi")))
