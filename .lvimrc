@@ -1,2 +1,2 @@
-let g:scotch_stop = "(snowball.main/stop!)"
-let g:scotch_start = "(snowball.main/start!)"
+let g:scotch_stop = "(bounce.core/stop!)"
+let g:scotch_start = "(bounce.core/start!)"

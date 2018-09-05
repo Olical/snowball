@@ -9,7 +9,7 @@
         camel-snake-kebab {:mvn/version "0.4.0"}
         com.taoensso/timbre {:mvn/version "4.10.0"}
         com.discord4j/Discord4J {:mvn/version "2.10.1"}
-        com.stuartsierra/component {:mvn/version "0.3.2"}
+        jarohen/bounce {:mvn/version "0.0.1-rc1"}
 
         com.google.cloud/google-cloud-texttospeech {:mvn/version "0.41.0-beta"}
         net.sourceforge.argparse4j/argparse4j {:mvn/version "0.8.1"}}

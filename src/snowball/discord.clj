@@ -1,6 +1,6 @@
 (ns snowball.discord
   (:require [clojure.string :as str]
-            [com.stuartsierra.component :as component]
+            [bounce.system :as b]
             [taoensso.timbre :as log]
             [camel-snake-kebab.core :as csk]
             [snowball.config :as config]
@@ -17,50 +17,43 @@
       (str/replace #"Event.*$" "")
       (csk/->kebab-case-keyword)))
 
-(defmulti handle-event! (fn [_ c] (event->keyword c)))
-(defmethod handle-event! :default [_ _])
+(defmulti handle-event! (fn [c] (event->keyword c)))
+(defmethod handle-event! :default [_])
 
 (declare ready?)
 
-(defn poll-until-ready [{:keys [config] :as discord}]
-  (let [poll-ms (config/get config :discord :poll-ms)]
+(defn poll-until-ready []
+  (let [poll-ms (get-in config/value [:discord :poll-ms])]
     (log/info "Connected, waiting until ready")
-    (util/poll-while poll-ms #(not (ready? discord)) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
+    (util/poll-while poll-ms #(not (ready?)) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
     (log/info "Ready")))
 
-(defrecord Discord [config]
-  component/Lifecycle
+(b/defcomponent client {:bounce/deps #{config/value}}
+  (log/info "Connecting to Discord")
+  (let [token (get-in config/value [:discord :token])
+        client (.. (ClientBuilder.)
+                   (withToken token)
+                   login)]
 
-  (start [this]
-    (log/info "Connecting to Discord")
-    (let [token (config/get config :discord :token)
-          client (.. (ClientBuilder.)
-                     (withToken token)
-                     login)
-          this (assoc this :client client)]
+    (.registerListener
+      (.getDispatcher client)
+      (reify IListener
+        (handle [_ event]
+          (handle-event! event))))
 
-      (.registerListener
-        (.getDispatcher client)
-        (reify IListener
-          (handle [_ event]
-            (handle-event! this event))))
+    (poll-until-ready)
 
-      (poll-until-ready this)
+    (b/with-stop client
+      (log/info "Shutting down Discord connection")
+      (.logout client))))
 
-      this))
-
-  (stop [{:keys [client] :as this}]
-    (log/info "Logging out of existing client")
-    (.logout client)
-    (assoc this :client nil)))
-
-(defn channels [{:keys [client]}]
+(defn channels []
   (seq (.getVoiceChannels client)))
 
 (defn channel-users [channel]
   (seq (.getConnectedUsers channel)))
 
-(defn current-channel [{:keys [client]}]
+(defn current-channel []
   (-> (.getConnectedVoiceChannels client)
       (seq)
       (first)))
@@ -76,7 +69,7 @@
 (defn bot? [user]
   (.isBot user))
 
-(defn ready? [{:keys [client]}]
+(defn ready? []
   (.isReady client))
 
 (defn muted? [user]
@@ -94,31 +87,31 @@
        (seq)
        (boolean)))
 
-(defn guilds [{:keys [client]}]
+(defn guilds []
   (seq (.getGuilds client)))
 
-(defn play! [discord audio]
-  (doto (AudioPlayer/getAudioPlayerForGuild (first (guilds discord)))
+(defn play! [audio]
+  (doto (AudioPlayer/getAudioPlayerForGuild (first (guilds)))
     (.clear)
     (.queue audio)))
 
-(defmethod handle-event! :reconnect-success [discord event]
+(defmethod handle-event! :reconnect-success [event]
   (log/info "Reconnection detected, leaving any existing voice channels to avoid weird state")
-  (poll-until-ready discord)
-  (when-let [channel (current-channel discord)]
+  (poll-until-ready)
+  (when-let [channel (current-channel)]
     (leave! channel)))
 
-(defn audio-manager [discord]
-  (-> (guilds discord) (first) (.getAudioManager)))
+(defn audio-manager []
+  (-> (guilds) (first) (.getAudioManager)))
 
-(defn subscribe-audio! [discord f]
-  (let [am (audio-manager discord)
+(defn subscribe-audio! [f]
+  (let [am (audio-manager)
         subscription (reify IAudioReceiver
                        (receive [_ audio user _ _]
                          (f audio user)))]
     (.subscribeReceiver am subscription)
     subscription))
 
-(defn unsubscribe-audio! [discord subscription]
-  (let [am (audio-manager discord)]
+(defn unsubscribe-audio! [subscription]
+  (let [am (audio-manager)]
     (.unsubscribeReceiver am subscription)))
