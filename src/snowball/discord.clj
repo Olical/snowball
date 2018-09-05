@@ -25,7 +25,7 @@
 (defn poll-until-ready []
   (let [poll-ms (get-in config/value [:discord :poll-ms])]
     (log/info "Connected, waiting until ready")
-    (util/poll-while poll-ms #(not (ready?)) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
+    (util/poll-while poll-ms (complement ready?) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
     (log/info "Ready")))
 
 (b/defcomponent client {:bounce/deps #{config/value}}
@@ -41,7 +41,8 @@
         (handle [_ event]
           (handle-event! event))))
 
-    (poll-until-ready)
+    (with-redefs [client client]
+      (poll-until-ready))
 
     (b/with-stop client
       (log/info "Shutting down Discord connection")
