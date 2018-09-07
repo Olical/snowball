@@ -7,7 +7,7 @@
             [snowball.discord :as discord]
             [snowball.speech :as speech]))
 
-(b/defcomponent presence {:bounce/deps #{discord/client config/value}}
+(b/defcomponent <presence {:bounce/deps #{discord/client config/value}}
   (log/info "Starting presence poller")
   (-> (a/go-loop []
         (a/<! (a/timeout (get-in config/value [:watch :poll-ms])))
@@ -27,9 +27,9 @@
         (recur))
       (b/with-stop
         (log/info "Stopping presence poller")
-        (a/close! presence))))
+        (a/close! <presence))))
 
-(b/defcomponent five-queue []
+(b/defcomponent <five-queue []
   (log/info "Starting five queue poller")
   (-> (a/go-loop [previous-size nil
                   last-announcement nil]
@@ -50,4 +50,4 @@
           (recur nil nil)))
       (b/with-stop
         (log/info "Stopping five queue poller")
-        (a/close! five-queue))))
+        (a/close! <five-queue))))
