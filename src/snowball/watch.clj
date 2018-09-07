@@ -29,10 +29,11 @@
         (log/info "Stopping presence poller")
         (a/close! presence-chan))))
 
-(b/defcomponent five-queue-chan []
+(b/defcomponent five-queue-chan {:bounce/deps #{discord/client config/value}}
   (log/info "Starting five queue poller")
   (-> (a/go-loop [previous-size nil
                   last-announcement nil]
+        (a/<! (a/timeout (get-in config/value [:watch :poll-ms])))
         (if-let [channel (discord/current-channel)]
           (let [channel-size (->> (discord/channel-users channel)
                                   (filter discord/can-speak?)

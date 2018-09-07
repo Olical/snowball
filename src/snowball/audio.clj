@@ -22,3 +22,11 @@
 
 (defn write [audio-stream target]
   (AudioSystem/write audio-stream file-type (io/output-stream target)))
+
+(defn downsample [audio]
+  (->> audio
+       (partition 2)
+       (into [] (comp (take-nth 6)
+                      (map reverse)))
+       (flatten)
+       (byte-array)))

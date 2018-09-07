@@ -1,24 +1,16 @@
 (ns snowball.discord
   (:require [clojure.string :as str]
+            [clojure.core.async :as a]
             [bounce.system :as b]
             [taoensso.timbre :as log]
             [camel-snake-kebab.core :as csk]
+            [snowball.audio :as audio]
             [snowball.config :as config]
             [snowball.util :as util])
   (:import [sx.blah.discord.api ClientBuilder]
            [sx.blah.discord.util.audio AudioPlayer]
            [sx.blah.discord.handle.audio IAudioReceiver]
            [sx.blah.discord.api.events IListener]))
-
-; (defn handle-audio! [audio user]
-;   (when-not (discord/bot? user)
-;     (let [bs (->> audio
-;                   (partition 2)
-;                   (into [] (comp (take-nth 6)
-;                                  (map reverse)))
-;                   (flatten)
-;                   (byte-array))]
-;       (stream/write (:stream listener) bs))))
 
 (defn event->keyword [c]
   (-> (str c)
@@ -30,33 +22,16 @@
 (defmulti handle-event! (fn [c] (event->keyword c)))
 (defmethod handle-event! :default [_])
 
-(declare ready?)
+(declare client)
+
+(defn ready? []
+  (.isReady client))
 
 (defn poll-until-ready []
   (let [poll-ms (get-in config/value [:discord :poll-ms])]
     (log/info "Connected, waiting until ready")
     (util/poll-while poll-ms (complement ready?) #(log/info "Not ready, sleeping for" (str poll-ms "ms")))
     (log/info "Ready")))
-
-(b/defcomponent client {:bounce/deps #{config/value}}
-  (log/info "Connecting to Discord")
-  (let [token (get-in config/value [:discord :token])
-        client (.. (ClientBuilder.)
-                   (withToken token)
-                   login)]
-
-    (.registerListener
-      (.getDispatcher client)
-      (reify IListener
-        (handle [_ event]
-          (handle-event! event))))
-
-    (with-redefs [client client]
-      (poll-until-ready))
-
-    (b/with-stop client
-      (log/info "Shutting down Discord connection")
-      (.logout client))))
 
 (defn channels []
   (seq (.getVoiceChannels client)))
@@ -65,9 +40,7 @@
   (seq (.getConnectedUsers channel)))
 
 (defn current-channel []
-  (-> (.getConnectedVoiceChannels client)
-      (seq)
-      (first)))
+  (some-> client .getConnectedVoiceChannels seq first))
 
 (defn leave! [channel]
   (log/info "Leaving" (.getName channel))
@@ -79,9 +52,6 @@
 
 (defn bot? [user]
   (.isBot user))
-
-(defn ready? []
-  (.isReady client))
 
 (defn muted? [user]
   (let [voice-state (first (.. user getVoiceStates values))]
@@ -119,10 +89,43 @@
   (let [am (audio-manager)
         subscription (reify IAudioReceiver
                        (receive [_ audio user _ _]
-                         (f audio user)))]
+                         (when-not (bot? user)
+                           (f user audio))))]
     (.subscribeReceiver am subscription)
     subscription))
 
 (defn unsubscribe-audio! [subscription]
   (let [am (audio-manager)]
     (.unsubscribeReceiver am subscription)))
+
+(b/defcomponent audio-chan
+  (-> (a/chan (a/sliding-buffer 100))
+      (b/with-stop
+        (a/close! audio-chan))))
+
+(b/defcomponent client {:bounce/deps #{config/value audio-chan}}
+  (log/info "Connecting to Discord")
+  (let [token (get-in config/value [:discord :token])
+        client (.. (ClientBuilder.)
+                   (withToken token)
+                   login)]
+
+    (.registerListener
+      (.getDispatcher client)
+      (reify IListener
+        (handle [_ event]
+          (handle-event! event))))
+
+    (with-redefs [client client]
+      (poll-until-ready)
+
+      (let [audio-sub (subscribe-audio!
+                        (fn [user audio]
+                          (a/go
+                            (a/>! audio-chan
+                                  {:user user
+                                   :audio (audio/downsample audio)}))))]
+        (b/with-stop client
+          (log/info "Shutting down Discord connection")
+          (unsubscribe-audio! audio-sub)
+          (.logout client))))))
