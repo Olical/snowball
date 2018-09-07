@@ -91,17 +91,22 @@
   (some-> (guilds) first .getAudioManager))
 
 (defn subscribe-audio! [f]
-  (let [am (audio-manager)
-        subscription (reify IAudioReceiver
-                       (receive [_ audio user _ _]
-                         (when-not (bot? user)
-                           (f user audio))))]
-    (.subscribeReceiver am subscription)
-    subscription))
+  (let [sub! (atom nil)]
+    (a/go-loop []
+      (a/<! (a/timeout (get-in config/value [:discord :poll-ms])))
+      (if-let [am (audio-manager)]
+        (let [sub (reify IAudioReceiver
+                    (receive [_ audio user _ _]
+                      (when-not (bot? user)
+                        (f user audio))))]
+          (reset! sub! sub)
+          (log/info "Audio manager exists, subscribing to audio")
+          (.subscribeReceiver am sub))
+        (recur)))
 
-(defn unsubscribe-audio! [subscription]
-  (let [am (audio-manager)]
-    (.unsubscribeReceiver am subscription)))
+    (fn []
+      (when-let [sub @sub!]
+        (.unsubscribeReceiver (audio-manager) sub)))))
 
 (b/defcomponent client {:bounce/deps #{config/value}}
   (log/info "Connecting to Discord")
@@ -131,11 +136,11 @@
         (a/close! audio-chan))))
 
 (b/defcomponent audio-subscription {:bounce/deps #{client audio-chan}}
-  (log/info "Subscribing to audio")
+  (log/info "Starting audio subscriber (will wait for audio manager)")
   (-> (subscribe-audio!
         (fn [user audio]
           (a/go
             (a/>! audio-chan {:user user, :audio (audio/downsample audio)}))))
       (b/with-stop
         (log/info "Unsubscribing from audio")
-        (unsubscribe-audio! audio-subscription))))
+        (audio-subscription))))
