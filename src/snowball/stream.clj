@@ -4,6 +4,9 @@
             PipedOutputStream
             ByteArrayOutputStream]))
 
+(defn size [s]
+  (.size s))
+
 (defn output []
   (PipedOutputStream.))
 

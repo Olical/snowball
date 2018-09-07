@@ -4,4 +4,4 @@
            :poll-ms 1000}
  :watch {:poll-ms 5000}
  :comprehension {:phrase-debounce-ms 800
-                 :buffer-cutoff-count 1000}}
+                 :stream-bytes-cutoff 1000000}}

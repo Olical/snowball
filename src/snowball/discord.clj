@@ -51,6 +51,9 @@
     (log/info "Joining" (.getName channel))
     (.join channel)))
 
+(defn user->name [user]
+  (some-> user .getName))
+
 (defn bot? [user]
   (some-> user .isBot))
 
