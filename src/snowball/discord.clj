@@ -4,7 +4,6 @@
             [bounce.system :as b]
             [taoensso.timbre :as log]
             [camel-snake-kebab.core :as csk]
-            [snowball.audio :as audio]
             [snowball.config :as config]
             [snowball.util :as util])
   (:import [sx.blah.discord.api ClientBuilder]
@@ -54,6 +53,9 @@
 
 (defn bot? [user]
   (some-> user .isBot))
+
+(defn id [user]
+  (some-> user .getLongID))
 
 (defn muted? [user]
   (when user
