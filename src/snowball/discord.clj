@@ -130,19 +130,14 @@
       (log/info "Shutting down Discord connection")
       (.logout client))))
 
-(b/defcomponent audio-chan
-  (log/info "Creating audio channel")
-  (-> (a/chan (a/sliding-buffer 100))
-      (b/with-stop
-        (log/info "Closing audio channel")
-        (a/close! audio-chan))))
-
-(b/defcomponent audio-subscription {:bounce/deps #{client audio-chan}}
-  (log/info "Starting audio subscriber (will wait for audio manager)")
-  (-> (subscribe-audio!
-        (fn [event]
-          (a/go
-            (a/>! audio-chan event))))
-      (b/with-stop
-        (log/info "Unsubscribing from audio")
-        (audio-subscription))))
+(b/defcomponent audio-chan {:bounce/deps #{client}}
+  (log/info "Starting audio channel from subscription")
+  (let [audio-chan (a/chan (a/sliding-buffer 100))
+        sub (subscribe-audio!
+              (fn [event]
+                (a/go
+                  (a/>! audio-chan event))))]
+    (b/with-stop audio-chan
+      (log/info "Closing audio channel and unsubscribing")
+      (sub)
+      (a/close! audio-chan))))

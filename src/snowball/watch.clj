@@ -51,3 +51,6 @@
       (b/with-stop
         (log/info "Stopping five queue poller")
         (a/close! five-queue-chan))))
+
+(b/defcomponent pollers {:bounce/deps #{presence-chan five-queue-chan}}
+  nil)

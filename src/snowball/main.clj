@@ -12,10 +12,8 @@
 
   (log/info "Starting components...")
   (b/set-opts! #{'snowball.config/value
-                 'snowball.discord/client
-                 'snowball.discord/audio-subscription
+                 'snowball.discord/audio-chan
                  'snowball.speech/synthesiser
-                 'snowball.watch/presence-chan
-                 'snowball.watch/five-queue-chan})
+                 'snowball.watch/pollers})
   (b/start!)
   (log/info "Everything's up and running!"))
