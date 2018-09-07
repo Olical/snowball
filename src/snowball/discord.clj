@@ -25,7 +25,7 @@
 (declare client)
 
 (defn ready? []
-  (.isReady client))
+  (some-> client .isReady))
 
 (defn poll-until-ready []
   (let [poll-ms (get-in config/value [:discord :poll-ms])]
@@ -34,30 +34,33 @@
     (log/info "Ready")))
 
 (defn channels []
-  (seq (.getVoiceChannels client)))
+  (some-> client .getConnectedVoiceChannels seq))
 
 (defn channel-users [channel]
-  (seq (.getConnectedUsers channel)))
+  (some-> channel .getConnectedUsers seq))
 
 (defn current-channel []
   (some-> client .getConnectedVoiceChannels seq first))
 
 (defn leave! [channel]
-  (log/info "Leaving" (.getName channel))
-  (.leave channel))
+  (when channel
+    (log/info "Leaving" (.getName channel))
+    (.leave channel)))
 
 (defn join! [channel]
-  (log/info "Joining" (.getName channel))
-  (.join channel))
+  (when channel
+    (log/info "Joining" (.getName channel))
+    (.join channel)))
 
 (defn bot? [user]
-  (.isBot user))
+  (some-> user .isBot))
 
 (defn muted? [user]
-  (let [voice-state (first (.. user getVoiceStates values))]
-    (or (.isMuted voice-state)
-        (.isSelfMuted voice-state)
-        (.isSuppressed voice-state))))
+  (when user
+    (let [voice-state (first (.. user getVoiceStates values))]
+      (or (.isMuted voice-state)
+          (.isSelfMuted voice-state)
+          (.isSuppressed voice-state)))))
 
 (defn can-speak? [user]
   (not (or (bot? user) (muted? user))))
@@ -69,21 +72,23 @@
        (boolean)))
 
 (defn guilds []
-  (seq (.getGuilds client)))
+  (some-> client .getGuilds seq))
 
 (defn play! [audio]
-  (doto (AudioPlayer/getAudioPlayerForGuild (first (guilds)))
-    (.clear)
-    (.queue audio)))
+  (when audio
+    (when-let [guild (first (guilds))]
+      (doto (AudioPlayer/getAudioPlayerForGuild guild)
+        (.clear)
+        (.queue audio)))))
 
-(defmethod handle-event! :reconnect-success [event]
+(defmethod handle-event! :reconnect-success [_]
   (log/info "Reconnection detected, leaving any existing voice channels to avoid weird state")
   (poll-until-ready)
   (when-let [channel (current-channel)]
     (leave! channel)))
 
 (defn audio-manager []
-  (-> (guilds) (first) (.getAudioManager)))
+  (some-> (guilds) first .getAudioManager))
 
 (defn subscribe-audio! [f]
   (let [am (audio-manager)
@@ -98,12 +103,7 @@
   (let [am (audio-manager)]
     (.unsubscribeReceiver am subscription)))
 
-(b/defcomponent audio-chan
-  (-> (a/chan (a/sliding-buffer 100))
-      (b/with-stop
-        (a/close! audio-chan))))
-
-(b/defcomponent client {:bounce/deps #{config/value audio-chan}}
+(b/defcomponent client {:bounce/deps #{config/value}}
   (log/info "Connecting to Discord")
   (let [token (get-in config/value [:discord :token])
         client (.. (ClientBuilder.)
@@ -117,15 +117,25 @@
           (handle-event! event))))
 
     (with-redefs [client client]
-      (poll-until-ready)
+      (poll-until-ready))
 
-      (let [audio-sub (subscribe-audio!
-                        (fn [user audio]
-                          (a/go
-                            (a/>! audio-chan
-                                  {:user user
-                                   :audio (audio/downsample audio)}))))]
-        (b/with-stop client
-          (log/info "Shutting down Discord connection")
-          (unsubscribe-audio! audio-sub)
-          (.logout client))))))
+    (b/with-stop client
+      (log/info "Shutting down Discord connection")
+      (.logout client))))
+
+(b/defcomponent audio-chan
+  (log/info "Creating audio channel")
+  (-> (a/chan (a/sliding-buffer 100))
+      (b/with-stop
+        (log/info "Closing audio channel")
+        (a/close! audio-chan))))
+
+(b/defcomponent audio-subscription {:bounce/deps #{client audio-chan}}
+  (log/info "Subscribing to audio")
+  (-> (subscribe-audio!
+        (fn [user audio]
+          (a/go
+            (a/>! audio-chan {:user user, :audio (audio/downsample audio)}))))
+      (b/with-stop
+        (log/info "Unsubscribing from audio")
+        (unsubscribe-audio! audio-subscription))))

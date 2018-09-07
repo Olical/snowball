@@ -40,3 +40,6 @@
   (future
     (->> (synthesise message)
          (discord/play!))))
+
+(comment
+  (say! "Hello, World!"))

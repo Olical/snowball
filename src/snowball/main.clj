@@ -13,6 +13,7 @@
   (log/info "Starting components...")
   (b/set-opts! #{'snowball.config/value
                  'snowball.discord/client
+                 'snowball.discord/audio-subscription
                  'snowball.speech/synthesiser
                  'snowball.watch/presence-chan
                  'snowball.watch/five-queue-chan})

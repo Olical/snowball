@@ -15,7 +15,6 @@
                                    (filter discord/has-speaking-users?)
                                    (first))
               current-channel (discord/current-channel)]
- 
           (cond
             (and current-channel (nil? desired-channel))
             (discord/leave! current-channel)
