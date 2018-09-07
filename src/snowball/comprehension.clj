@@ -31,11 +31,8 @@
                                     ;; The future waits a chunk of time before continuing, gives time for a future-cancel.
                                     (Thread/sleep (get-in config/value [:comprehension :phrase-debounce-ms]))
 
-                                    (let [{:keys [byte-stream] :as phrase} (@state! user)]
-                                      ;; Put the phrase on the channel and remove it from the state.
-                                      (log/info (str "Phrase from " (discord/user->name user) ", " (stream/size byte-stream) " bytes"))
-                                      (a/>! phrase-chan phrase))
-
+                                    ;; Put the phrase on the channel and remove it from the state.
+                                    (a/>! phrase-chan (@state! user))
                                     (swap! state! dissoc user)))))
                        {:byte-stream (stream/byte-array-output)
                         :debounce (future)})))
