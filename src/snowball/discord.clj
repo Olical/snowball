@@ -34,7 +34,7 @@
     (log/info "Ready")))
 
 (defn channels []
-  (some-> client .getConnectedVoiceChannels seq))
+  (some-> client .getVoiceChannels seq))
 
 (defn channel-users [channel]
   (some-> channel .getConnectedUsers seq))
