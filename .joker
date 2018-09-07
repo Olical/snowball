@@ -1,0 +1,2 @@
+{:known-macros [bounce.system/defcomponent]
+ :ignored-unused-namespaces [cider.nrepl]}
