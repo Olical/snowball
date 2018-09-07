@@ -10,6 +10,16 @@
            [sx.blah.discord.handle.audio IAudioReceiver]
            [sx.blah.discord.api.events IListener]))
 
+; (defn handle-audio! [audio user]
+;   (when-not (discord/bot? user)
+;     (let [bs (->> audio
+;                   (partition 2)
+;                   (into [] (comp (take-nth 6)
+;                                  (map reverse)))
+;                   (flatten)
+;                   (byte-array))]
+;       (stream/write (:stream listener) bs))))
+
 (defn event->keyword [c]
   (-> (str c)
       (str/split #"\.")
