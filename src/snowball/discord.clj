@@ -140,7 +140,7 @@
   (-> (subscribe-audio!
         (fn [user audio]
           (a/go
-            (a/>! audio-chan {:user user, :audio (audio/downsample audio)}))))
+            (a/>! audio-chan {:user user, :audio audio}))))
       (b/with-stop
         (log/info "Unsubscribing from audio")
         (audio-subscription))))
