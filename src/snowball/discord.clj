@@ -90,6 +90,8 @@
 (defn audio-manager []
   (some-> (guilds) first .getAudioManager))
 
+(defrecord AudioEvent [audio user])
+
 (defn subscribe-audio! [f]
   (let [sub! (atom nil)]
     (a/go-loop []
@@ -98,7 +100,7 @@
         (let [sub (reify IAudioReceiver
                     (receive [_ audio user _ _]
                       (when-not (bot? user)
-                        (f user audio))))]
+                        (f (AudioEvent. audio user)))))]
           (reset! sub! sub)
           (log/info "Audio manager exists, subscribing to audio")
           (.subscribeReceiver am sub))
@@ -138,9 +140,9 @@
 (b/defcomponent audio-subscription {:bounce/deps #{client audio-chan}}
   (log/info "Starting audio subscriber (will wait for audio manager)")
   (-> (subscribe-audio!
-        (fn [user audio]
+        (fn [event]
           (a/go
-            (a/>! audio-chan {:user user, :audio audio}))))
+            (a/>! audio-chan event))))
       (b/with-stop
         (log/info "Unsubscribing from audio")
         (audio-subscription))))
