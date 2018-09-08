@@ -1,3 +1,4 @@
 .cpcache/
 resources/config.edn
 resources/google.json
+wake-word-engine/
