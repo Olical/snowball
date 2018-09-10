@@ -3,7 +3,7 @@
 run: porcupine
 	GOOGLE_APPLICATION_CREDENTIALS="$(shell pwd)/resources/google.json" \
 	LD_LIBRARY_PATH="wake-word-engine/jni" \
-	clj -e "(do (import '[snowball Porcupine]) (Porcupine. \"wake-word-engine/Porcupine/lib/common/porcupine_params.pv\" \"wake-word-engine/hey snowball_li.ppm\" 0.5))"
+	clj -e "(do (import '[snowball Porcupine]) (Porcupine. \"wake-word-engine/Porcupine/lib/common/porcupine_params.pv\" \"wake-word-engine/hey snowball_linux.ppn\" 0.5))"
 	# -m snowball.main
 
 porcupine:
@@ -26,8 +26,8 @@ porcupine:
 		    -I/usr/lib/jvm/default/include/linux \
 		    -I./wake-word-engine/Porcupine/include \
 		    -I./wake-word-engine/jni \
-		    ./wake-word-engine/Porcupine/lib/linux/x86_64/libpv_porcupine.a \
 		    ./src/c/porcupine.c \
+		    ./wake-word-engine/Porcupine/lib/linux/x86_64/libpv_porcupine.a \
 		    -o wake-word-engine/jni/libpv_porcupine.so; \
 	fi
 
