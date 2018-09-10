@@ -1,5 +1,4 @@
-{:paths ["src" "resources"
-         "wake-word-engine/Porcupine/binding/android/porcupine/src/main/java"]
+{:paths ["src/clojure" "src/java" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.9.0"}
         org.clojure/core.async {:mvn/version "0.4.474"}
         org.clojure/tools.nrepl {:mvn/version "0.2.13"}
