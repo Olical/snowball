@@ -24,8 +24,10 @@ porcupine:
 		    -I/usr/include \
 		    -I/usr/lib/jvm/default/include \
 		    -I/usr/lib/jvm/default/include/linux \
+		    -I./wake-word-engine/Porcupine/include \
+		    -I./wake-word-engine/jni \
 		    ./wake-word-engine/Porcupine/lib/linux/x86_64/libpv_porcupine.a \
-		    ./wake-word-engine/jni/porcupine.h \
+		    ./src/c/porcupine.c \
 		    -o wake-word-engine/jni/libpv_porcupine.so; \
 	fi
 
