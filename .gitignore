@@ -2,5 +2,4 @@
 resources/config.edn
 resources/google.json
 wake-word-engine/
-lib/
 *.class
