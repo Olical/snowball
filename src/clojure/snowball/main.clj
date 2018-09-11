@@ -13,7 +13,7 @@
   (log/info "Starting components...")
   (b/set-opts! #{'snowball.config/value
                  'snowball.discord/audio-chan
-                 'snowball.comprehension/phrase-chan
+                 'snowball.comprehension/woken-by-chan
                  'snowball.speech/synthesiser
                  'snowball.watch/pollers})
   (b/start!)
