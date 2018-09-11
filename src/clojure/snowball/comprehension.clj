@@ -23,10 +23,10 @@
           (when-not (@state! user)
             (swap! state! assoc user
                    (let [debounce-chan (a/chan)
-                         db-out-chan (util/debounce debounce-chan (get-in config/value [:comprehension :phrase-debounce-ms]))]
+                         out-chan (util/debounce debounce-chan (get-in config/value [:comprehension :phrase-debounce-ms]))]
                      (a/thread
                        (a/go
-                         (a/>! phrase-chan (a/<! db-out-chan))
+                         (a/>! phrase-chan (a/<! out-chan))
                          (swap! state! dissoc user)))
                      {:byte-stream (stream/byte-array-output)
                       :debounce-chan debounce-chan})))
@@ -47,8 +47,8 @@
 
     (b/with-stop phrase-chan
       (log/info "Closing phrase channel")
-      (doseq [{:keys [db-in-chan]} (vals @state!)]
-        (a/close! db-in-chan))
+      (doseq [{:keys [debounce-chan]} (vals @state!)]
+        (a/close! debounce-chan))
       (a/close! phrase-chan))))
 
 (defn resampled-frames [byte-stream]
