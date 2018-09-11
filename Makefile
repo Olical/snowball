@@ -17,8 +17,7 @@ porcupine:
 	fi
 	if [ ! -f "wake-word-engine/jni" ]; then \
 		mkdir -p wake-word-engine/jni; \
-		javac src/java/snowball/porcupine/Porcupine.java; \
-		javah -cp src/java -o wake-word-engine/jni/porcupine.h snowball.porcupine.Porcupine; \
+		javac -h wake-word-engine/jni src/java/snowball/porcupine/Porcupine.java; \
 		gcc -shared -O3 \
 		    -I/usr/include \
 		    -I/usr/lib/jvm/default/include \

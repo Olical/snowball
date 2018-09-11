@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <pv_porcupine.h>
-#include <porcupine.h>
+#include <snowball_porcupine_Porcupine.h>
 
 JNIEXPORT jlong JNICALL Java_snowball_porcupine_Porcupine_init
   (JNIEnv *env, jobject obj, jstring model_raw, jstring keyword_raw, jfloat sens) {
