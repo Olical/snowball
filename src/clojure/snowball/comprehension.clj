@@ -4,7 +4,8 @@
             [bounce.system :as b]
             [snowball.discord :as discord]
             [snowball.config :as config]
-            [snowball.stream :as stream]))
+            [snowball.stream :as stream])
+  (import [snowball.porcupine Porcupine]))
 
 (b/defcomponent phrase-chan {:bounce/deps #{discord/audio-chan config/value}}
   (log/info "Starting phrase channel")
@@ -43,3 +44,11 @@
     (b/with-stop phrase-chan
       (log/info "Closing phrase channel")
       (a/close! phrase-chan))))
+
+(b/defcomponent woken-by-chan {:bounce/deps #{phrase-chan}}
+  (let [woken-by-chan (a/chan)
+        porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv"
+                              "wake-word-engine/hey snowball_linux.ppn"
+                              0.5)]
+    (b/with-stop woken-by-chan
+      (.delete porcupine))))

@@ -1,7 +1,7 @@
 // Copied and modified from the Porcupine project Android binding.
 // https://github.com/Picovoice/Porcupine
 
-package snowball;
+package snowball.porcupine;
 
 public class Porcupine {
     private final long object;
