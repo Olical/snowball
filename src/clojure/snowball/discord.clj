@@ -98,21 +98,25 @@
 (defrecord AudioEvent [audio user])
 
 (defn subscribe-audio! [f]
-  (let [sub! (atom nil)]
-    (a/go-loop []
-      (a/<! (a/timeout (get-in config/value [:discord :poll-ms])))
-      (if-let [am (audio-manager)]
-        (let [sub (reify IAudioReceiver
-                    (receive [_ audio user _ _]
-                      (when-not (bot? user)
-                        (f (AudioEvent. audio user)))))]
-          (reset! sub! sub)
-          (log/info "Audio manager exists, subscribing to audio")
-          (.subscribeReceiver am sub))
-        (recur)))
+  (let [sub! (atom nil)
+        closed?! (atom false)
+        sub-chan (a/go-loop []
+                   (when-not @closed?!
+                     (a/<! (a/timeout (get-in config/value [:discord :poll-ms])))
+                     (if-let [am (audio-manager)]
+                       (let [sub (reify IAudioReceiver
+                                   (receive [_ audio user _ _]
+                                     (when-not (bot? user)
+                                       (f (AudioEvent. audio user)))))]
+                         (reset! sub! sub)
+                         (log/info "Audio manager exists, subscribing to audio")
+                         (.subscribeReceiver am sub))
+                       (recur))))]
 
     (fn []
       (when-let [sub @sub!]
+        (reset! closed?! true)
+        (a/close! sub-chan)
         (.unsubscribeReceiver (audio-manager) sub)))))
 
 (b/defcomponent client {:bounce/deps #{config/value}}
