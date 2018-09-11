@@ -54,6 +54,8 @@
         porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv"
                               "wake-word-engine/hey snowball_linux.ppn"
                               0.5)]
+    (log/info (str "Porcupine frame length is " (.getFrameLength porcupine) " samples, "
+                   "sample rate is " (.getSampleRate porcupine) "hz."))
     (b/with-stop woken-by-chan
       (log/info "Shutting down Porcupine")
       (.delete porcupine))))

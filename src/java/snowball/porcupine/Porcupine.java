@@ -10,9 +10,9 @@ public class Porcupine {
         System.loadLibrary("pv_porcupine");
     }
 
-    public Porcupine(String modelFilePath, String keywordFilePath, float sensitivity) throws Exception {
+    public Porcupine(String modelFilePath, String keywordFilePath, float sens) throws Exception {
         try {
-            object = init(modelFilePath, keywordFilePath, sensitivity);
+            object = init(modelFilePath, keywordFilePath, sens);
         } catch (Exception e) {
             throw new Exception(e);
         }
@@ -20,7 +20,7 @@ public class Porcupine {
 
     public boolean processFrame(short[] pcm) throws Exception {
         try {
-            return process(object, pcm) == 0;
+            return process(object, pcm);
         } catch (Exception e) {
             throw new Exception(e);
         }
@@ -36,7 +36,7 @@ public class Porcupine {
 
     private native long init(String modelFilePath, String keywordFilePaths, float sensitivitie);
 
-    private native int process(long object, short[] pcm);
+    private native boolean process(long object, short[] pcm);
 
     private native void delete(long object);
 }

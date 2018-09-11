@@ -26,10 +26,21 @@ JNIEXPORT void JNICALL Java_snowball_porcupine_Porcupine_delete
 }
 
 JNIEXPORT jint JNICALL Java_snowball_porcupine_Porcupine_getFrameLength
-  (JNIEnv *, jobject);
+  (JNIEnv *env, jobject obj) {
+  return pv_porcupine_frame_length();
+}
 
 JNIEXPORT jint JNICALL Java_snowball_porcupine_Porcupine_getSampleRate
-  (JNIEnv *, jobject);
+  (JNIEnv *env, jobject obj) {
+  return pv_sample_rate();
+}
 
-JNIEXPORT jint JNICALL Java_snowball_porcupine_Porcupine_process
-  (JNIEnv *, jobject, jlong, jshortArray);
+JNIEXPORT jboolean JNICALL Java_snowball_porcupine_Porcupine_process
+  (JNIEnv *env, jobject obj, jlong handle, jshortArray pcm_raw) {
+  jshort *pcm = (*env)->GetShortArrayElements(env, pcm_raw, 0);
+  bool *result;
+
+  pv_porcupine_process((pv_porcupine_object_t*)handle, pcm, result);
+
+  return *result;
+}
