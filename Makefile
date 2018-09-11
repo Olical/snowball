@@ -3,7 +3,7 @@
 run: porcupine
 	GOOGLE_APPLICATION_CREDENTIALS="$(shell pwd)/resources/google.json" \
 	LD_LIBRARY_PATH="wake-word-engine/jni" \
-	clj -m snowball.main
+	clojure -m snowball.main
 
 porcupine:
 	if [ ! -d "wake-word-engine/Porcupine" ]; then \
@@ -30,4 +30,4 @@ porcupine:
 	fi
 
 outdated:
-	clj -Aoutdated
+	clojure -Aoutdated
