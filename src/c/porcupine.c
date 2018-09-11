@@ -21,7 +21,9 @@ JNIEXPORT jlong JNICALL Java_snowball_porcupine_Porcupine_init
 }
 
 JNIEXPORT void JNICALL Java_snowball_porcupine_Porcupine_delete
-  (JNIEnv *, jobject, jlong);
+  (JNIEnv *env, jobject ob, jlong handle) {
+  pv_porcupine_delete((pv_porcupine_object_t*)handle);
+}
 
 JNIEXPORT jint JNICALL Java_snowball_porcupine_Porcupine_getFrameLength
   (JNIEnv *, jobject);
