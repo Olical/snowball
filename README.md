@@ -9,24 +9,30 @@ Written in Clojure, feel free to fork and mess with it if you can work out how t
  * [x] Connecting to Discord
  * [x] Joining and leaving voice channels automatically when there are users around
  * [x] Synthesising speech using Google's API and sending it to a voice channel
- * [x] Receiving audio into a file (just interim until I can pipe through Sphinx / Google Speech API)
+ * [x] Receiving audio into a file (just interim until I can pipe through Porcupine / Google Speech API)
  * [x] Batching streams of audio into distinct phrases grouped by user.
- * [ ] Wake word detection with Porcupine (requires resampling the phrases)
- * [ ] Sending audio after a keyword off to Google for recognition (can use Discord's native 48kHz BigEndian)
+ * [x] Wake word detection with Porcupine (requires resampling the phrases)
+ * [ ] Sending audio after a keyword off to Google for recognition
  * [ ] Actual bot functionality using the comprehension and synthesis of speech developed earlier
 
 ## Prerequisites
 
  * Create `resources/config.edn`, there's an example file in the same directory.
  * Create `resources/google.json`, you can create a key file for your service account in your GCP dashboard.
+ * The wake word detection is provided by [Porcupine][] and currently limited to Linux 64 bit. It requires some compilation that's run when you execute `make`.
 
-## Notes for development
+## Running
 
- * Discord returns audio in `48KHz 16bit stereo signed BigEndian PCM`
- * Sphinx requires `RIFF (little-endian) data, WAVE audio, Microsoft PCM, 16 bit, mono 16000  Hz`
- * https://cmusphinx.github.io/wiki/tutorialsphinx4/
- * https://stackoverflow.com/questions/44772319/converting-raw-pcm-sound-java
- * https://github.com/jakebasile/clojure-jni-example
- * https://github.com/picovoice/porcupine
+After you've met the prerequisites listed above, simply run `make`. It'll compile and run everything required.
+
+This will download the [Porcupine][] repository which is about 3gb last time I checked, you may be waiting around for a while.
+
+## Notes on audio formats
+
+ * Discord provides audio as `48KHz 16bit stereo signed BigEndian PCM`
+ * Porcupine requires `16KHz 16bit mono signed LittleEndian PCM`
+ * I _think_ GCP speech recognition can handle most PCM formats but I can use the same as Porcupine.
 
 ![](images/snowball.png)
+
+[Porcupine]: https://github.com/picovoice/porcupine

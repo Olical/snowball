@@ -87,7 +87,7 @@
         (recur)))
 
     (if (and (= frame-length 512) (= sample-rate 16000))
-      (log/info (str "Porcupine frame length is 512 samples and the sample rate is 16kHz, as expected."))
+      (log/info (str "Porcupine frame length is 512 samples and the sample rate is 16KHz, as expected."))
       (throw (Error. (str "Porcupine frame length and sample rate should be 512 / 16000, got " frame-length " / " sample-rate " instead!"))))
 
     (b/with-stop woken-by-chan
