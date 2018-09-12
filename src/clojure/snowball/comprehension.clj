@@ -59,8 +59,7 @@
   (->> byte-stream
        (stream/->bytes)
        (partition 2)
-       (into [] (comp (take-nth 6)
-                      (map byte->short)))
+       (sequence (comp (take-nth 6) (map byte->short)))
        (partition 512 512 (repeat 0))
        (map short-array)))
 
@@ -78,8 +77,11 @@
         (try
           (let [frames (resampled-frames byte-stream)]
             (when (some #(.processFrame porcupine %) frames)
-              (log/info "Porcupine returned a hit for" (.getName user))
-              (speech/say! (str "hey " (.getName user)))))
+              (log/info "Woken by" (discord/user->name user))
+              (a/>! woken-by-chan user)
+
+              ;; TODO Delete this, it's a temporary acknowledgement.
+              (speech/say! (str "hey " (discord/user->name user)))))
           (catch Exception e
             (log/error "Caught error in woken-by-chan loop" (Throwable->map e))))
         (recur)))
