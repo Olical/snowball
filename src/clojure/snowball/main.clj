@@ -15,6 +15,6 @@
                  'snowball.discord/audio-chan
                  'snowball.comprehension/woken-by-chan
                  'snowball.speech/synthesiser
-                 'snowball.watch/pollers})
+                 'snowball.presence/poller})
   (b/start!)
   (log/info "Everything's up and running!"))

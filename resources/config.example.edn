@@ -2,6 +2,6 @@
 
 {:discord {:token "INSERT DISCORD BOT TOKEN"
            :poll-ms 1000}
- :watch {:poll-ms 5000}
+ :presence {:poll-ms 1000}
  :comprehension {:phrase-debounce-ms 800
                  :stream-bytes-cutoff 1000000}}
