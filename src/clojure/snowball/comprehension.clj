@@ -5,7 +5,8 @@
             [snowball.discord :as discord]
             [snowball.config :as config]
             [snowball.stream :as stream]
-            [snowball.util :as util])
+            [snowball.util :as util]
+            [snowball.speech :as speech])
   (:import [snowball.porcupine Porcupine]))
 
 (b/defcomponent phrase-chan {:bounce/deps #{discord/audio-chan config/value}}
@@ -63,7 +64,7 @@
        (partition 512 512 (repeat 0))
        (map short-array)))
 
-(b/defcomponent woken-by-chan {:bounce/deps #{phrase-chan}}
+(b/defcomponent woken-by-chan {:bounce/deps #{phrase-chan speech/synthesiser}}
   (log/info "Starting Porcupine")
   (let [woken-by-chan (a/chan (a/sliding-buffer 100))
         porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv"
@@ -76,8 +77,9 @@
       (when-let [{:keys [user byte-stream]} (a/<! phrase-chan)]
         (try
           (let [frames (resampled-frames byte-stream)]
-            (prn "===" (.getName user) "frame count" (count frames))
-            (prn (some #(.processFrame porcupine %) frames)))
+            (when (some #(.processFrame porcupine %) frames)
+              (log/info "Porcupine returned a hit for " (.getName user))
+              (speech/say "hey " (.getName user))))
           (catch Exception e
             (log/error "Caught error in woken-by-chan loop" (Throwable->map e))))
         (recur)))
