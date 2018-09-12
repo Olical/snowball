@@ -38,11 +38,11 @@ JNIEXPORT jint JNICALL Java_snowball_porcupine_Porcupine_getSampleRate
 JNIEXPORT jboolean JNICALL Java_snowball_porcupine_Porcupine_process
   (JNIEnv *env, jobject obj, jlong handle, jshortArray pcm_raw) {
   jshort *pcm = (*env)->GetShortArrayElements(env, pcm_raw, 0);
-  bool *result;
+  bool result;
 
-  pv_porcupine_process((pv_porcupine_object_t*)handle, pcm, result);
+  pv_porcupine_process((pv_porcupine_object_t*)handle, pcm, &result);
 
   (*env)->ReleaseShortArrayElements(env, pcm_raw, pcm, 0);
 
-  return *result;
+  return result;
 }

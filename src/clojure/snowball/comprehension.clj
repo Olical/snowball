@@ -51,13 +51,16 @@
         (a/close! debounce-chan))
       (a/close! phrase-chan))))
 
+(defn byte->short [[a b]]
+  (bit-or (bit-shift-left a 8) (bit-and b 0xFF)))
+
 (defn resampled-frames [byte-stream]
   (->> byte-stream
        (stream/->bytes)
        (partition 2)
        (into [] (comp (take-nth 6)
-                      (mapcat reverse)))
-       (partition 1024 1024 (repeat 0))
+                      (map byte->short)))
+       (partition 512 512 (repeat 0))
        (map short-array)))
 
 (b/defcomponent woken-by-chan {:bounce/deps #{phrase-chan}}
