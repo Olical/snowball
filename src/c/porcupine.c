@@ -21,7 +21,7 @@ JNIEXPORT jlong JNICALL Java_snowball_porcupine_Porcupine_init
 }
 
 JNIEXPORT void JNICALL Java_snowball_porcupine_Porcupine_delete
-  (JNIEnv *env, jobject ob, jlong handle) {
+  (JNIEnv *env, jobject obj, jlong handle) {
   pv_porcupine_delete((pv_porcupine_object_t*)handle);
 }
 
@@ -41,6 +41,8 @@ JNIEXPORT jboolean JNICALL Java_snowball_porcupine_Porcupine_process
   bool *result;
 
   pv_porcupine_process((pv_porcupine_object_t*)handle, pcm, result);
+
+  (*env)->ReleaseShortArrayElements(env, pcm_raw, pcm, 0);
 
   return *result;
 }

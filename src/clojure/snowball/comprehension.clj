@@ -56,8 +56,7 @@
        (stream/->bytes)
        (partition 2)
        (into [] (comp (take-nth 6)
-                      (map reverse)))
-       (flatten)
+                      (mapcat reverse)))
        (partition 1024 1024 (repeat 0))
        (map short-array)))
 
@@ -75,7 +74,7 @@
         (try
           (let [frames (resampled-frames byte-stream)]
             (prn "===" (.getName user) "frame count" (count frames))
-            #_(prn (some #(.processFrame porcupine %) frames)))
+            (prn (some #(.processFrame porcupine %) frames)))
           (catch Exception e
             (log/error "Caught error in woken-by-chan loop" (Throwable->map e))))
         (recur)))
