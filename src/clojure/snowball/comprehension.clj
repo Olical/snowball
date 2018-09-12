@@ -68,7 +68,7 @@
   (log/info "Starting Porcupine")
   (let [woken-by-chan (a/chan (a/sliding-buffer 100))
         porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv"
-                              "wake-word-engine/hey snowball_linux.ppn"
+                              "wake-word-engine/hey_snowball_linux.ppn"
                               0.5)
         frame-length (.getFrameLength porcupine)
         sample-rate (.getSampleRate porcupine)]
