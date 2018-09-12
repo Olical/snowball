@@ -78,7 +78,7 @@
         (try
           (let [frames (resampled-frames byte-stream)]
             (when (some #(.processFrame porcupine %) frames)
-              (log/info "Porcupine returned a hit for " (.getName user))
+              (log/info "Porcupine returned a hit for" (.getName user))
               (speech/say! (str "hey " (.getName user)))))
           (catch Exception e
             (log/error "Caught error in woken-by-chan loop" (Throwable->map e))))
