@@ -1,3 +1,0 @@
-{
-  "WARNING": "You need to create a service account in your GCP console. Put the resulting JSON file in google.json"
-}

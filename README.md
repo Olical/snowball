@@ -17,7 +17,7 @@ Written in Clojure, feel free to fork and mess with it if you can work out how t
 
 ## Prerequisites
 
- * Create `resources/config.edn`, there's an example file in the same directory.
+ * Create `resources/config.edn`, it's merged with `resources/config.base.edn` so you can set your own Discord token with `{:discord {:token "..."}}`.
  * Create `resources/google.json`, you can create a key file for your service account in your GCP dashboard.
  * The wake word detection is provided by [Porcupine][] and currently limited to Linux 64 bit. It requires some compilation that's run when you execute `make`.
 

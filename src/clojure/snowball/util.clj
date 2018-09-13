@@ -33,3 +33,14 @@
                (recur new-val)))))
     out))
 
+;; https://github.com/clojure-cookbook/clojure-cookbook/blob/master/02_composite-data/2-23_combining-maps.asciidoc
+(defn deep-merge-with [f & maps]
+  (apply
+    (fn m [& maps]
+      (if (every? map? maps)
+        (apply merge-with m maps)
+        (apply f maps)))
+    maps))
+
+(defn deep-merge [& maps]
+  (apply deep-merge-with (fn [_ v] v) maps))

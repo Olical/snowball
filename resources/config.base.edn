@@ -1,6 +1,4 @@
-;; Copy to config.edn and edit where required.
-
-{:discord {:token "INSERT DISCORD BOT TOKEN"
+{:discord {:token nil
            :poll-ms 1000}
  :presence {:poll-ms 1000}
  :comprehension {:phrase-debounce-ms 800

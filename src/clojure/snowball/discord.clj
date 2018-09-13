@@ -122,9 +122,11 @@
 (b/defcomponent client {:bounce/deps #{config/value}}
   (log/info "Connecting to Discord")
   (let [token (get-in config/value [:discord :token])
-        client (.. (ClientBuilder.)
-                   (withToken token)
-                   login)]
+        client (if token
+                 (.. (ClientBuilder.)
+                     (withToken token)
+                     login)
+                 (throw (Error. "Discord token not found, please set {:discord {:token \"...\"}} in `resources/config.edn`.")))]
 
     (.registerListener
       (.getDispatcher client)
