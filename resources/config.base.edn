@@ -2,4 +2,5 @@
            :poll-ms 1000}
  :presence {:poll-ms 1000}
  :comprehension {:phrase-debounce-ms 800
-                 :stream-bytes-cutoff 1000000}}
+                 :stream-bytes-cutoff 1000000}
+ :speech {:cache-bucket-name "snowball-speech-cache"}}

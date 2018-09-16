@@ -1,4 +1,5 @@
 (ns snowball.stream
+  (:require [clojure.java.io :as io])
   (:import [java.io
             PipedInputStream
             PipedOutputStream
@@ -15,6 +16,9 @@
 
 (defn ->bytes [s]
   (.toByteArray s))
+
+(defn ->input-stream [x]
+  (io/input-stream x))
 
 (def stream-size (* 64 1024))
 
