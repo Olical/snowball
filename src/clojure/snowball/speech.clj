@@ -38,14 +38,15 @@
         (str "-" (digest/sha-256 s)))))
 
 (defn write-cache! [message data]
-  (.. cache
-      (create
-        (.. BlobInfo
-            (newBuilder (get-in config/value [:speech :cache-bucket-name])
-                        (object-name message))
-            build)
-        data
-        (make-array com.google.cloud.storage.Storage$BlobTargetOption 0))))
+  (future
+    (.. cache
+        (create
+          (.. BlobInfo
+              (newBuilder (get-in config/value [:speech :cache-bucket-name])
+                          (object-name message))
+              build)
+          data
+          (make-array com.google.cloud.storage.Storage$BlobTargetOption 0)))))
 
 (defn read-cache [message]
   (let [blob-id (.. BlobId
