@@ -21,11 +21,9 @@
             BlobInfo
             BlobId]))
 
-(b/defcomponent cache {:bounce/deps #{config/value}}
-  (log/info "Starting speech cache")
-  (.. StorageOptions
-      getDefaultInstance
-      getService))
+(def storage (.. StorageOptions
+                 getDefaultInstance
+                 getService))
 
 (defn object-name [s]
   (let [slug (-> s
@@ -40,7 +38,7 @@
 (defn write-cache! [message data]
   (when-let [bucket (get-in config/value [:speech :cache :bucket])]
     (future
-      (.. cache
+      (.. storage
           (create
             (.. BlobInfo (newBuilder bucket (object-name message)) build)
             data
@@ -49,12 +47,12 @@
 (defn read-cache [message]
   (when-let [bucket (get-in config/value [:speech :cache :bucket])]
     (let [blob-id (.. BlobId (of bucket (object-name message)))
-          blob (.. cache (get blob-id))]
+          blob (.. storage (get blob-id))]
       (when blob
         (.. blob
             (getContent (make-array com.google.cloud.storage.Blob$BlobSourceOption 0)))))))
 
-(b/defcomponent synthesiser {:bounce/deps #{discord/client cache}}
+(b/defcomponent synthesiser {:bounce/deps #{discord/client}}
   (log/info "Starting up speech client")
   (-> {:client (TextToSpeechClient/create)
        :voice (.. VoiceSelectionParams
