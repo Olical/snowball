@@ -9,8 +9,6 @@
             [snowball.speech :as speech])
   (:import [snowball.porcupine Porcupine]))
 
-;; TODO Bug: Every other "hey snowball" doesn't seem to register. Probably to do with the debounce code.
-
 (b/defcomponent phrase-audio-chan {:bounce/deps #{discord/audio-chan config/value}}
   (log/info "Starting phrase channel")
   (let [phrase-audio-chan (a/chan (a/sliding-buffer 100))
@@ -79,20 +77,18 @@
           (let [frames (resampled-frames byte-stream)]
             (when (some #(.processFrame porcupine %) frames)
               (let [user-name (discord/user->name user)
-                    timeout-chan (a/timeout (get-in config/value [:comprehension :post-wake-timeout-ms]))
-                    user-phrase-audio-chan (a/chan (a/sliding-buffer 100) (filter #(= (:user %) user)))]
+                    timeout-chan (a/timeout (get-in config/value [:comprehension :post-wake-timeout-ms]))]
                 (log/info (str "Woken by " user-name "."))
                 (speech/say! (str "hey " user-name))
 
-                (a/pipe phrase-audio-chan user-phrase-audio-chan)
-
-                (if-let [byte-stream (a/alt!
-                                       timeout-chan nil
-                                       user-phrase-audio-chan ([phrase] (:byte-stream phrase)))]
-                  (log/info "TODO Send audio off to Google speech to text.")
-                  (log/info user-name "didn't say anything after the wake word."))
-
-                (a/close! user-phrase-audio-chan))))
+                (loop []
+                  (if-let [phrase (a/alt!
+                                    timeout-chan nil
+                                    phrase-audio-chan ([phrase] phrase))]
+                    (if (= user (:user phrase))
+                      (log/info "TODO Send audio off to Google speech to text.")
+                      (recur))
+                    (log/info user-name "didn't say anything after the wake word."))))))
           (catch Exception e
             (log/error "Caught error in phrase-text-chan loop" (Throwable->map e))))
         (recur)))
