@@ -9,6 +9,8 @@
             [snowball.speech :as speech])
   (:import [snowball.porcupine Porcupine]))
 
+;; TODO Bug: Every other "hey snowball" doesn't seem to register. Probably to do with the debounce code.
+
 (b/defcomponent phrase-audio-chan {:bounce/deps #{discord/audio-chan config/value}}
   (log/info "Starting phrase channel")
   (let [phrase-audio-chan (a/chan (a/sliding-buffer 100))
