@@ -9,9 +9,9 @@
             [snowball.speech :as speech])
   (:import [snowball.porcupine Porcupine]))
 
-(b/defcomponent phrase-chan {:bounce/deps #{discord/audio-chan config/value}}
+(b/defcomponent phrase-audio-chan {:bounce/deps #{discord/audio-chan config/value}}
   (log/info "Starting phrase channel")
-  (let [phrase-chan (a/chan (a/sliding-buffer 100))
+  (let [phrase-audio-chan (a/chan (a/sliding-buffer 100))
         state! (atom {})]
 
     (a/go-loop []
@@ -27,7 +27,7 @@
                          out-chan (util/debounce debounce-chan (get-in config/value [:comprehension :phrase-debounce-ms]))]
                      (a/thread
                        (a/go
-                         (a/>! phrase-chan (a/<! out-chan))
+                         (a/>! phrase-audio-chan (a/<! out-chan))
                          (swap! state! dissoc user)))
                      {:byte-stream (stream/byte-array-output)
                       :debounce-chan debounce-chan})))
@@ -43,14 +43,14 @@
               ;; Update the debounced in channel.
               (a/>! debounce-chan {:byte-stream byte-stream, :user user})))
           (catch Exception e
-            (log/error "Caught error in phrase-chan loop" (Throwable->map e))))
+            (log/error "Caught error in phrase-audio-chan loop" (Throwable->map e))))
         (recur)))
 
-    (b/with-stop phrase-chan
+    (b/with-stop phrase-audio-chan
       (log/info "Closing phrase channel")
       (doseq [{:keys [debounce-chan]} (vals @state!)]
         (a/close! debounce-chan))
-      (a/close! phrase-chan))))
+      (a/close! phrase-audio-chan))))
 
 (defn byte->short [[a b]]
   (bit-or (bit-shift-left a 8) (bit-and b 0xFF)))
@@ -63,9 +63,9 @@
        (partition 512 512 (repeat 0))
        (map short-array)))
 
-(b/defcomponent woken-by-chan {:bounce/deps #{phrase-chan speech/synthesiser}}
+(b/defcomponent phrase-text-chan {:bounce/deps #{phrase-audio-chan speech/synthesiser}}
   (log/info "Starting Porcupine")
-  (let [woken-by-chan (a/chan (a/sliding-buffer 100))
+  (let [phrase-text-chan (a/chan (a/sliding-buffer 100))
         porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv"
                               "wake-word-engine/hey_snowball_linux.ppn"
                               0.5)
@@ -73,23 +73,33 @@
         sample-rate (.getSampleRate porcupine)]
 
     (a/go-loop []
-      (when-let [{:keys [user byte-stream]} (a/<! phrase-chan)]
+      (when-let [{:keys [user byte-stream]} (a/<! phrase-audio-chan)]
         (try
           (let [frames (resampled-frames byte-stream)]
             (when (some #(.processFrame porcupine %) frames)
-              (log/info "Woken by" (discord/user->name user))
-              (a/>! woken-by-chan user)
+              (let [user-name (discord/user->name user)
+                    timeout-chan (a/timeout (get-in config/value [:comprehension :post-wake-timeout-ms]))
+                    user-phrase-audio-chan (a/chan (a/sliding-buffer 100) (filter #(= (:user %) user)))]
+                (log/info "Woken by" user-name)
+                (speech/say! (str user-name "?"))
 
-              ;; TODO Delete this, it's a temporary acknowledgement.
-              (speech/say! (str "hey " (discord/user->name user)))))
+                (a/pipe phrase-audio-chan user-phrase-audio-chan)
+
+                (if-let [byte-stream (a/alt!
+                                       timeout-chan nil
+                                       user-phrase-audio-chan ([phrase] (:byte-stream phrase)))]
+                  (log/info "TODO Send audio off to Google speech to text.")
+                  (log/info user-name "didn't say anything after the wake word."))
+
+                (a/close! user-phrase-audio-chan))))
           (catch Exception e
-            (log/error "Caught error in woken-by-chan loop" (Throwable->map e))))
+            (log/error "Caught error in phrase-text-chan loop" (Throwable->map e))))
         (recur)))
 
     (if (and (= frame-length 512) (= sample-rate 16000))
       (log/info (str "Porcupine frame length is 512 samples and the sample rate is 16KHz, as expected."))
       (throw (Error. (str "Porcupine frame length and sample rate should be 512 / 16000, got " frame-length " / " sample-rate " instead!"))))
 
-    (b/with-stop woken-by-chan
+    (b/with-stop phrase-text-chan
       (log/info "Shutting down Porcupine")
       (.delete porcupine))))

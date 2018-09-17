@@ -2,5 +2,6 @@
            :poll-ms 1000}
  :presence {:poll-ms 1000}
  :comprehension {:phrase-debounce-ms 500
-                 :stream-bytes-cutoff 1000000}
+                 :stream-bytes-cutoff 1000000
+                 :post-wake-timeout-ms 12000}
  :speech {:cache {:bucket nil}}}
