@@ -38,24 +38,21 @@
         (str "-" (digest/sha-256 s)))))
 
 (defn write-cache! [message data]
-  (future
-    (.. cache
-        (create
-          (.. BlobInfo
-              (newBuilder (get-in config/value [:speech :cache-bucket-name])
-                          (object-name message))
-              build)
-          data
-          (make-array com.google.cloud.storage.Storage$BlobTargetOption 0)))))
+  (when-let [bucket (get-in config/value [:speech :cache :bucket])]
+    (future
+      (.. cache
+          (create
+            (.. BlobInfo (newBuilder bucket (object-name message)) build)
+            data
+            (make-array com.google.cloud.storage.Storage$BlobTargetOption 0))))))
 
 (defn read-cache [message]
-  (let [blob-id (.. BlobId
-                    (of (get-in config/value [:speech :cache-bucket-name])
-                        (object-name message)))
-        blob (.. cache (get blob-id))]
-    (when blob
-      (.. blob
-          (getContent (make-array com.google.cloud.storage.Blob$BlobSourceOption 0))))))
+  (when-let [bucket (get-in config/value [:speech :cache :bucket])]
+    (let [blob-id (.. BlobId (of bucket (object-name message)))
+          blob (.. cache (get blob-id))]
+      (when blob
+        (.. blob
+            (getContent (make-array com.google.cloud.storage.Blob$BlobSourceOption 0)))))))
 
 (b/defcomponent synthesiser {:bounce/deps #{discord/client cache}}
   (log/info "Starting up speech client")
