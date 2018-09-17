@@ -116,8 +116,8 @@
                                                     (setContent proto-bytes)
                                                     (build))
                               results (-> (.. speech-client
-                                          (recognize recognition-config recognition-audio)
-                                          (getResultsList))
+                                              (recognize recognition-config recognition-audio)
+                                              (getResultsList))
                                           (.iterator)
                                           (iterator-seq))]
                           (if (seq results)
