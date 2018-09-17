@@ -92,15 +92,18 @@
         sample-rate (.getSampleRate porcupine)]
 
     (a/go-loop []
+      ;; Wait for audio from a user in the voice channel.
       (when-let [{:keys [user byte-stream]} (a/<! phrase-audio-chan)]
         (try
           (let [frames (resample-for-porcupine byte-stream)]
+            ;; Check if that audio contained the wake phrase using porcupine.
             (when (some #(.processFrame porcupine %) frames)
               (let [user-name (discord/user->name user)
                     timeout-chan (a/timeout (get-in config/value [:comprehension :post-wake-timeout-ms]))]
                 (log/info (str "Woken by " user-name "."))
                 (speech/say! (str "hey " user-name))
 
+                ;; Wake phrase was spotted, so now we wait for a timeout or some more audio from that user.
                 (loop []
                   (if-let [phrase (a/alt!
                                     timeout-chan nil
@@ -109,6 +112,7 @@
                       (do
                         ;; TODO Add context to speech to text so it can understand user and channel names.
 
+                        ;; Audio received from the wake phrase user, send it off to Google for recognition.
                         (log/info "Audio from" user-name "- sending to Google for speech recognition.")
                         (let [proto-bytes (.. ByteString (copyFrom (resample-for-google (:byte-stream phrase))))
                               recognition-audio (.. RecognitionAudio
@@ -120,6 +124,7 @@
                                               (getResultsList))
                                           (.iterator)
                                           (iterator-seq))]
+                          ;; If we have a transcription result, put it onto the output channel.
                           (if (seq results)
                             (doseq [result results]
                               (let [transcript (.. result (getAlternativesList) (get 0) (getTranscript))]
