@@ -27,10 +27,9 @@
             (swap! state! assoc user
                    (let [debounce-chan (a/chan)
                          out-chan (util/debounce debounce-chan (get-in config/value [:comprehension :phrase-debounce-ms]))]
-                     (a/thread
-                       (a/go
-                         (a/>! phrase-audio-chan (a/<! out-chan))
-                         (swap! state! dissoc user)))
+                     (a/go
+                       (a/>! phrase-audio-chan (a/<! out-chan))
+                       (swap! state! dissoc user))
                      {:byte-stream (stream/byte-array-output)
                       :debounce-chan debounce-chan})))
 
@@ -54,14 +53,14 @@
         (a/close! debounce-chan))
       (a/close! phrase-audio-chan))))
 
-(defn byte->short [[a b]]
+(defn byte-pair->short [[a b]]
   (bit-or (bit-shift-left a 8) (bit-and b 0xFF)))
 
 (defn resampled-frames [byte-stream]
   (->> byte-stream
        (stream/->bytes)
        (partition 2)
-       (sequence (comp (take-nth 6) (map byte->short)))
+       (sequence (comp (take-nth 6) (map byte-pair->short)))
        (partition 512 512 (repeat 0))
        (map short-array)))
 
@@ -82,8 +81,8 @@
               (let [user-name (discord/user->name user)
                     timeout-chan (a/timeout (get-in config/value [:comprehension :post-wake-timeout-ms]))
                     user-phrase-audio-chan (a/chan (a/sliding-buffer 100) (filter #(= (:user %) user)))]
-                (log/info "Woken by" user-name)
-                (speech/say! (str user-name "?"))
+                (log/info (str "Woken by " user-name "."))
+                (speech/say! (str "hey " user-name))
 
                 (a/pipe phrase-audio-chan user-phrase-audio-chan)
 
