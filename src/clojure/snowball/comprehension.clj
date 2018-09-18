@@ -61,6 +61,11 @@
 (defn byte-pair->short [[a b]]
   (bit-or (bit-shift-left a 8) (bit-and b 0xFF)))
 
+;; Notes on audio formats:
+;; Discord provides audio as `48KHz 16bit stereo signed BigEndian PCM`.
+;; Porcupine requires `16KHz 16bit mono signed LittleEndian PCM` but in 512 length short-array frames (a short is two bytes).
+;; GCP speech recognitionn requries the same as Porcupine but as byte pairs and without the 512 frames.
+
 (defn resample-for-porcupine [byte-stream]
   (->> byte-stream
        (stream/->bytes)
@@ -163,10 +168,6 @@
                             (doseq [result results]
                               (let [transcript (.. result (getAlternativesList) (get 0) (getTranscript))]
                                 (log/info  "Speech recognition transcript result:" transcript)
-
-                                ;; TODO Remove this, it's a temporary parrot thing.
-                                (speech/say! (str "I heard: " transcript))
-
                                 (a/>! phrase-text-chan {:user user, :phrase transcript})))
                             (log/info "No results from Google speech recognition."))))
                       (recur))
