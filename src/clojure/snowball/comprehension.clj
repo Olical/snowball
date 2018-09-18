@@ -76,15 +76,19 @@
        (flatten)
        (byte-array)))
 
+(defn speech-context-phrases []
+  (loop [phrases (->> (concat (take 400 (discord/guild-users))
+                              (take 50 (discord/guild-text-channels))
+                              (take 50 (discord/guild-voice-channels)))
+                      (into [] (comp (map #(.getName %))
+                                     (map #(subs % 0 (min (count %) 100))))))]
+    (if (> (reduce + (map count phrases)) 10000)
+      (recur (subvec phrases 1))
+      phrases)))
+
 (b/defcomponent phrase-text-chan {:bounce/deps #{phrase-audio-chan speech/synthesiser}}
   (log/info "Starting speech to text systems")
   (let [speech-client (.. SpeechClient (create))
-        recognition-config (.. RecognitionConfig
-                               (newBuilder)
-                               (setEncoding (.. com.google.cloud.speech.v1p1beta1.RecognitionConfig$AudioEncoding LINEAR16))
-                               (setSampleRateHertz 16000)
-                               (setLanguageCode "en-GB")
-                               (build))
         phrase-text-chan (a/chan (a/sliding-buffer 100))
         porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv"
                               "wake-word-engine/hey_snowball_linux.ppn"
@@ -111,19 +115,21 @@
                                     phrase-audio-chan ([phrase] phrase))]
                     (if (= user (:user phrase))
                       (do
-                        ;; TODO Add context to speech to text so it can understand user and channel names.
-                        ;; Fn to fetch all channel names (including audio).
-                        ;; Fn to fetch all user names (online first)
-                        ;; Fn to merge and trim those to a limit of 500 + < 10k characters
-                        ;; 500 phrases, 100 char max len. 10k max len overall.
-
-                        (comment
-                          (.. (SpeechContext.)
-                              (setPhrases (java.util.List. ["a" "b" "c"]))))
-
                         ;; Audio received from the wake phrase user, send it off to Google for recognition.
                         (log/info "Audio from" user-name "- sending to Google for speech recognition.")
                         (let [proto-bytes (.. ByteString (copyFrom (resample-for-google (:byte-stream phrase))))
+                              speech-context (.. SpeechContext
+                                                 (newBuilder)
+                                                 (addAllPhrases (speech-context-phrases))
+                                                 (build)
+                                                 (getPhrasesList))
+                              recognition-config (.. RecognitionConfig
+                                                     (newBuilder)
+                                                     (setEncoding (.. com.google.cloud.speech.v1p1beta1.RecognitionConfig$AudioEncoding LINEAR16))
+                                                     (setSampleRateHertz 16000)
+                                                     (setLanguageCode "en-GB")
+                                                     (setSpeechContext speech-context)
+                                                     (build))
                               recognition-audio (.. RecognitionAudio
                                                     (newBuilder)
                                                     (setContent proto-bytes)

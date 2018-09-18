@@ -76,12 +76,21 @@
        (seq)
        (boolean)))
 
-(defn guilds []
-  (some-> client .getGuilds seq))
+(defn default-guild []
+  (some-> client .getGuilds seq first))
+
+(defn guild-users []
+  (some-> (default-guild) .getUsers))
+
+(defn guild-text-channels []
+  (some-> (default-guild) .getChannels))
+
+(defn guild-voice-channels []
+  (some-> (default-guild) .getVoiceChannels))
 
 (defn play! [audio]
   (when audio
-    (when-let [guild (first (guilds))]
+    (when-let [guild (default-guild)]
       (doto (AudioPlayer/getAudioPlayerForGuild guild)
         (.clear)
         (.queue audio)))))
@@ -93,7 +102,7 @@
     (leave! channel)))
 
 (defn audio-manager []
-  (some-> (guilds) first .getAudioManager))
+  (some-> (default-guild) .getAudioManager))
 
 (defrecord AudioEvent [audio user])
 
