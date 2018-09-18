@@ -18,7 +18,7 @@
     #"who's a good boy" :>>
     (fn [_]
       (log/info "Acknowledging that I'm a good boy")
-      (speech/say! "I'm a good boy! It's me! I'm the good boy!"))
+      (speech/say! "I'm a good boy! It's me! I'm the good boy! Woof!"))
 
     (do
       (log/info "Couldn't find a matching command")
