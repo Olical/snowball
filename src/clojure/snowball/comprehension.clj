@@ -130,8 +130,8 @@
             (when (some #(.processFrame porcupine %) frames)
               (let [user-name (discord/->name user)
                     timeout-chan (a/timeout (get-in config/value [:comprehension :post-wake-timeout-ms]))]
-                (log/info (str "Woken by " user-name "."))
-                (speech/say! (str "hey " user-name))
+                (log/info  "Woken by" user-name)
+                (speech/say! (str "Hey " user-name "."))
 
                 ;; Wake phrase was spotted, so now we wait for a timeout or some more audio from that user.
                 (loop []
@@ -141,7 +141,7 @@
                     (if (= user (:user phrase))
                       (do
                         ;; Audio received from the wake phrase user, send it off to Google for recognition.
-                        (log/info "Audio from" user-name "- sending to Google for speech recognition.")
+                        (log/info "Audio from" user-name "- sending to Google for speech recognition")
                         (let [proto-bytes (.. ByteString (copyFrom (resample-for-google (:byte-stream phrase))))
                               speech-context (.. SpeechContext
                                                  (newBuilder)
@@ -169,17 +169,22 @@
                               (let [transcript (.. result (getAlternativesList) (get 0) (getTranscript))]
                                 (log/info  "Speech recognition transcript result:" transcript)
                                 (a/>! phrase-text-chan {:user user, :phrase transcript})))
-                            (log/info "No results from Google speech recognition."))))
+                            (do
+                              (log/info "No results from Google speech recognition")
+                              (speech/say! "I can't understand you, please try again.")))))
                       (recur))
-                    (log/info user-name "didn't say anything after the wake word."))))))
+                    (do
+                      (log/info user-name "didn't say anything after the wake word")
+                      (speech/say! "I didn't hear anything, please try again.")))))))
           (catch Exception e
             (log/error "Caught error in phrase-text-chan loop" (Throwable->map e))))
         (recur)))
 
     (if (and (= frame-length 512) (= sample-rate 16000))
-      (log/info (str "Porcupine frame length is 512 samples and the sample rate is 16KHz, as expected."))
+      (log/info (str "Porcupine frame length is 512 samples and the sample rate is 16KHz, as expected"))
       (throw (Error. (str "Porcupine frame length and sample rate should be 512 / 16000, got " frame-length " / " sample-rate " instead!"))))
 
     (b/with-stop phrase-text-chan
       (log/info "Shutting down speech to text systems")
+      (.shutdownNow speech-client)
       (.delete porcupine))))
