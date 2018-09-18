@@ -128,7 +128,7 @@
                                                      (setEncoding (.. com.google.cloud.speech.v1p1beta1.RecognitionConfig$AudioEncoding LINEAR16))
                                                      (setSampleRateHertz 16000)
                                                      (setLanguageCode "en-GB")
-                                                     (setSpeechContext speech-context)
+                                                     (setSpeechContexts speech-context)
                                                      (build))
                               recognition-audio (.. RecognitionAudio
                                                     (newBuilder)
