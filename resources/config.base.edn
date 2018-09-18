@@ -3,5 +3,6 @@
  :presence {:poll-ms 1000}
  :comprehension {:phrase-debounce-ms 500
                  :stream-bytes-cutoff 1000000
-                 :post-wake-timeout-ms 12000}
+                 :post-wake-timeout-ms 12000
+                 :phrases-cache-poll-ms 60000}
  :speech {:cache {:bucket nil}}}

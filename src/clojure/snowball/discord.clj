@@ -41,18 +41,18 @@
 (defn current-channel []
   (some-> client .getConnectedVoiceChannels seq first))
 
+(defn ->name [entity]
+  (some-> entity .getName))
+
 (defn leave! [channel]
   (when channel
-    (log/info "Leaving" (.getName channel))
+    (log/info "Leaving" (->name channel))
     (.leave channel)))
 
 (defn join! [channel]
   (when channel
-    (log/info "Joining" (.getName channel))
+    (log/info "Joining" (->name channel))
     (.join channel)))
-
-(defn user->name [user]
-  (some-> user .getName))
 
 (defn bot? [user]
   (some-> user .isBot))

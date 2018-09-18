@@ -88,6 +88,24 @@
       (recur (subvec phrases 1))
       phrases)))
 
+(defn sanitised-entities []
+  (letfn [(sanitise [entity] (str/replace entity #"[^\w\d-\s]" ""))
+          (trim [entity] (subs entity 0 (min (count entity) 100)))
+          (sanitised-map [entities] (into {} (map (juxt (comp trim sanitise discord/->name) identity)) entities))]
+    {:users (sanitised-map (discord/guild-users))
+     :text-channels (sanitised-map (discord/guild-text-channels))
+     :voice-channels (sanitised-map (discord/guild-voice-channels))}))
+
+(defn speech-context-entities []
+  (let [entity-map (sanitised-entities)
+        users (-> entity-map :users keys)
+        text-channels (-> entity-map :text-channels keys)
+        voice-channels (-> entity-map :voice-channels keys)]
+    (loop [entities (concat (take 400 users) (take 50 text-channels) (take 50 voice-channels))]
+      (if (< (reduce + (map count entities)) 10000)
+        (vec entities)
+        (recur (rest entities))))))
+
 (b/defcomponent phrase-text-chan {:bounce/deps #{phrase-audio-chan speech/synthesiser}}
   (log/info "Starting speech to text systems")
   (let [speech-client (.. SpeechClient (create))
@@ -105,7 +123,7 @@
           (let [frames (resample-for-porcupine byte-stream)]
             ;; Check if that audio contained the wake phrase using porcupine.
             (when (some #(.processFrame porcupine %) frames)
-              (let [user-name (discord/user->name user)
+              (let [user-name (discord/->name user)
                     timeout-chan (a/timeout (get-in config/value [:comprehension :post-wake-timeout-ms]))]
                 (log/info (str "Woken by " user-name "."))
                 (speech/say! (str "hey " user-name))
@@ -122,7 +140,7 @@
                         (let [proto-bytes (.. ByteString (copyFrom (resample-for-google (:byte-stream phrase))))
                               speech-context (.. SpeechContext
                                                  (newBuilder)
-                                                 (addAllPhrases (speech-context-phrases))
+                                                 (addAllPhrases (speech-context-entities))
                                                  (build))
                               recognition-config (.. RecognitionConfig
                                                      (newBuilder)
