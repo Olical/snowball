@@ -1,5 +1,6 @@
 (ns snowball.comprehension
-  (:require [clojure.core.async :as a]
+  (:require [clojure.string :as str]
+            [clojure.core.async :as a]
             [taoensso.timbre :as log]
             [bounce.system :as b]
             [snowball.discord :as discord]
@@ -81,6 +82,7 @@
                               (take 50 (discord/guild-text-channels))
                               (take 50 (discord/guild-voice-channels)))
                       (into [] (comp (map #(.getName %))
+                                     (map #(str/replace % #"[^\w\d-\s]" ""))
                                      (map #(subs % 0 (min (count %) 100))))))]
     (if (> (reduce + (map count phrases)) 10000)
       (recur (subvec phrases 1))
@@ -121,14 +123,13 @@
                               speech-context (.. SpeechContext
                                                  (newBuilder)
                                                  (addAllPhrases (speech-context-phrases))
-                                                 (build)
-                                                 (getPhrasesList))
+                                                 (build))
                               recognition-config (.. RecognitionConfig
                                                      (newBuilder)
                                                      (setEncoding (.. com.google.cloud.speech.v1p1beta1.RecognitionConfig$AudioEncoding LINEAR16))
                                                      (setSampleRateHertz 16000)
                                                      (setLanguageCode "en-GB")
-                                                     (setSpeechContexts speech-context)
+                                                     (addSpeechContexts speech-context)
                                                      (build))
                               recognition-audio (.. RecognitionAudio
                                                     (newBuilder)
