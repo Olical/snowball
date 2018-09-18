@@ -11,6 +11,7 @@
            [com.google.protobuf ByteString]
            [com.google.cloud.speech.v1p1beta1
             SpeechClient
+            SpeechContext
             RecognitionConfig
             RecognitionAudio]))
 
@@ -111,6 +112,14 @@
                     (if (= user (:user phrase))
                       (do
                         ;; TODO Add context to speech to text so it can understand user and channel names.
+                        ;; Fn to fetch all channel names (including audio).
+                        ;; Fn to fetch all user names (online first)
+                        ;; Fn to merge and trim those to a limit of 500 + < 10k characters
+                        ;; 500 phrases, 100 char max len. 10k max len overall.
+
+                        (comment
+                          (.. (SpeechContext.)
+                              (setPhrases (java.util.List. ["a" "b" "c"]))))
 
                         ;; Audio received from the wake phrase user, send it off to Google for recognition.
                         (log/info "Audio from" user-name "- sending to Google for speech recognition.")
