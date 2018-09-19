@@ -141,7 +141,7 @@
                  (.. (ClientBuilder.)
                      (withToken token)
                      login)
-                 (throw (Error. "Discord token not found, please set {:discord {:token \"...\"}} in `resources/config.edn`.")))]
+                 (throw (Error. "Discord token not found, please set {:discord {:token \"...\"}} in `config/config.edn`.")))]
 
     (.registerListener
       (.getDispatcher client)

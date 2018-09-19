@@ -15,9 +15,9 @@ A voice activated chat bot that sits in a [Discord][] server and joins audio cha
 
 ## Prerequisites
 
- * Create `resources/config.edn`, it's merged with `resources/config.base.edn` so you can set your own Discord token with `{:discord {:token "..."}}`.
+ * Create `config/config.edn`, it's merged with `config.base.edn` so you can set your own Discord token with `{:discord {:token "..."}}`.
  * To enable the synthesised speech cache, set `{:speech {:cache {:bucket "..."}}}` to a valid GCP bucket name in the config file.
- * Create `resources/google.json`, you can create a key file for your service account in your GCP dashboard.
+ * Create `config/google.json`, you can create a key file for your service account in your GCP dashboard.
  * The wake word detection is provided by [Porcupine][] and currently limited to Linux 64 bit. It requires some compilation that's run when you execute `make`.
 
 ## Running

@@ -1,5 +1,4 @@
 *.class
+/config/
 /.cpcache/
 /wake-word-engine/
-/resources/config.edn
-/resources/google.json

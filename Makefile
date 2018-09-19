@@ -8,12 +8,12 @@ LATEST := ${NAME}:latest
 default: wake-word-engine run
 
 run:
-	GOOGLE_APPLICATION_CREDENTIALS="$(shell pwd)/resources/google.json" \
+	GOOGLE_APPLICATION_CREDENTIALS="$(shell pwd)/config/google.json" \
 	LD_LIBRARY_PATH="wake-word-engine/jni" \
 	clojure -m snowball.main
 
 run-container:
-	docker run -p 9045:9045 -v $(shell pwd)/resources:/usr/snowball/resources -ti --rm olical/snowball
+	docker run -p 9045:9045 -v $(shell pwd)/config:/usr/snowball/config -ti --rm olical/snowball
 
 build: wake-word-engine
 	docker build -t ${IMG} .

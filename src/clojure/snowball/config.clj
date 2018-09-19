@@ -12,7 +12,7 @@
 
 (b/defcomponent value
   (let [base-path "config.base.edn"
-        user-path "resources/config.edn"]
+        user-path "config/config.edn"]
     (log/info "Loading base config from" base-path "and user config from" user-path)
     (util/deep-merge (path->data base-path)
                      (path->data user-path))))
