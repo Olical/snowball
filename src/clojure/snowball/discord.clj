@@ -44,6 +44,9 @@
 (defn ->name [entity]
   (some-> entity .getName))
 
+(defn ->id [entity]
+  (some-> entity .getLongID))
+
 (defn leave! [channel]
   (when channel
     (log/info "Leaving" (->name channel))
@@ -56,9 +59,6 @@
 
 (defn bot? [user]
   (some-> user .isBot))
-
-(defn id [user]
-  (some-> user .getLongID))
 
 (defn muted? [user]
   (when user

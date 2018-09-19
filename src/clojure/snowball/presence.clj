@@ -5,6 +5,14 @@
             [snowball.config :as config]
             [snowball.discord :as discord]))
 
+(defn allowed-to-join? [channel]
+  (let [{:keys [whitelist blacklist]} (get config/value :presence)
+        cid (discord/->id channel)]
+    (cond
+      (seq whitelist) (whitelist cid)
+      (seq blacklist) (not (blacklist cid))
+      :default true)))
+
 (b/defcomponent poller {:bounce/deps #{discord/client config/value}}
   (log/info "Starting presence poller")
   (let [closed?! (atom false)]
@@ -13,7 +21,10 @@
             (try
               (a/<! (a/timeout (get-in config/value [:presence :poll-ms])))
               (let [desired-channel (->> (discord/channels)
-                                         (filter discord/has-speaking-users?)
+                                         (sequence
+                                           (comp
+                                             (filter allowed-to-join?)
+                                             (filter discord/has-speaking-users?)))
                                          (first))
                     current-channel (discord/current-channel)]
                 (cond

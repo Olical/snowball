@@ -1,8 +1,13 @@
-{:discord {:token nil
-           :poll-ms 1000}
- :presence {:poll-ms 1000}
- :comprehension {:phrase-debounce-ms 500
-                 :stream-bytes-cutoff 1000000
-                 :post-wake-timeout-ms 12000
-                 :phrases-cache-poll-ms 60000}
- :speech {:cache {:bucket nil}}}
+{:discord {:token nil                              ;; Your Discord bot token.
+           :poll-ms 1000}                          ;; How long we should wait before asking Discord if we're connected again.
+
+ :presence {:poll-ms 1000                          ;; How long we should wait before checking if we should join another channel.
+            :blacklist #{}                         ;; Voice channel IDs that we're not allowed to see / join.
+            :whitelist #{}}                        ;; Voice channel IDs that we're _only_ allowed to see / join.
+                                                   ;; ex: #{492031890262589440}, use either the whitelist or the blacklist, not both.
+
+ :comprehension {:phrase-debounce-ms 100           ;; How long can someone not speak for before we cut it as a phrase and try to comprehend it.
+                 :stream-bytes-cutoff 1000000      ;; How many bytes can we hold for any given user before we cute it into a phrase.
+                 :post-wake-timeout-ms 12000}      ;; How long do we wait for a user to speak after they say the wake phrase.
+
+ :speech {:cache {:bucket nil}}}                   ;; A bucket that the speech synthesiser can use to store pre-rendered audio for reuse.
