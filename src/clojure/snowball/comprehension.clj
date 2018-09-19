@@ -33,7 +33,7 @@
                    (let [debounce-chan (a/chan)
                          out-chan (util/debounce debounce-chan (get-in config/value [:comprehension :phrase-debounce-ms]))]
                      (a/go
-                       (a/>! phrase-audio-chan (a/<! out-chan))
+                       (a/put! phrase-audio-chan (a/<! out-chan))
                        (swap! state! dissoc user))
                      {:byte-stream (stream/byte-array-output)
                       :debounce-chan debounce-chan})))
@@ -47,7 +47,7 @@
               (stream/write byte-stream audio)
 
               ;; Update the debounced in channel.
-              (a/>! debounce-chan {:byte-stream byte-stream, :user user})))
+              (a/put! debounce-chan {:byte-stream byte-stream, :user user})))
           (catch Exception e
             (log/error "Caught error in phrase-audio-chan loop" (Throwable->map e))))
         (recur)))
@@ -168,7 +168,7 @@
                             (doseq [result results]
                               (let [transcript (.. result (getAlternativesList) (get 0) (getTranscript))]
                                 (log/info  "Speech recognition transcript result:" transcript)
-                                (a/>! phrase-text-chan {:user user, :phrase transcript})))
+                                (a/put! phrase-text-chan {:user user, :phrase transcript})))
                             (do
                               (log/info "No results from Google speech recognition")
                               (speech/say! "I can't understand you, please try again.")))))

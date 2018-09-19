@@ -156,7 +156,7 @@
         sub (subscribe-audio!
               (fn [event]
                 (a/go
-                  (a/>! audio-chan event))))]
+                  (a/put! audio-chan event))))]
     (b/with-stop audio-chan
       (log/info "Closing audio channel and unsubscribing")
       (sub)
