@@ -10,19 +10,22 @@
   (let [closed?! (atom false)]
     (-> (a/go-loop []
           (when-not @closed?!
-            (a/<! (a/timeout (get-in config/value [:presence :poll-ms])))
-            (let [desired-channel (->> (discord/channels)
-                                       (filter discord/has-speaking-users?)
-                                       (first))
-                  current-channel (discord/current-channel)]
-              (cond
-                (and current-channel (nil? desired-channel))
-                (discord/leave! current-channel)
+            (try
+              (a/<! (a/timeout (get-in config/value [:presence :poll-ms])))
+              (let [desired-channel (->> (discord/channels)
+                                         (filter discord/has-speaking-users?)
+                                         (first))
+                    current-channel (discord/current-channel)]
+                (cond
+                  (and current-channel (nil? desired-channel))
+                  (discord/leave! current-channel)
 
-                (and (or (nil? current-channel)
-                         (not (discord/has-speaking-users? current-channel)))
-                     desired-channel)
-                (discord/join! desired-channel)))
+                  (and (or (nil? current-channel)
+                           (not (discord/has-speaking-users? current-channel)))
+                       desired-channel)
+                  (discord/join! desired-channel)))
+              (catch Error e
+                (log/error "Caught an error in presence loop" e)))
             (recur)))
         (b/with-stop
           (log/info "Stopping presence poller")

@@ -49,7 +49,7 @@
               ;; Update the debounced in channel.
               (a/put! debounce-chan {:byte-stream byte-stream, :user user})))
           (catch Exception e
-            (log/error "Caught error in phrase-audio-chan loop" (Throwable->map e))))
+            (log/error "Caught error in phrase-audio-chan loop" e)))
         (recur)))
 
     (b/with-stop phrase-audio-chan
@@ -177,7 +177,7 @@
                       (log/info user-name "didn't say anything after the wake word")
                       (speech/say! "I didn't hear anything, please try again.")))))))
           (catch Exception e
-            (log/error "Caught error in phrase-text-chan loop" (Throwable->map e))))
+            (log/error "Caught error in phrase-text-chan loop" e)))
         (recur)))
 
     (if (and (= frame-length 512) (= sample-rate 16000))

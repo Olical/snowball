@@ -113,13 +113,19 @@
                    (when-not @closed?!
                      (a/<! (a/timeout (get-in config/value [:discord :poll-ms])))
                      (if-let [am (audio-manager)]
-                       (let [sub (reify IAudioReceiver
-                                   (receive [_ audio user _ _]
-                                     (when-not (bot? user)
-                                       (f (AudioEvent. audio user)))))]
-                         (reset! sub! sub)
-                         (log/info "Audio manager exists, subscribing to audio")
-                         (.subscribeReceiver am sub))
+                       (try
+                         (let [sub (reify IAudioReceiver
+                                     (receive [_ audio user _ _]
+                                       (try
+                                         (when-not (bot? user)
+                                           (f (AudioEvent. audio user)))
+                                         (catch Error e
+                                           (log/error "Caught error while passing audio event to subscription handler" e)))))]
+                           (reset! sub! sub)
+                           (log/info "Audio manager exists, subscribing to audio")
+                           (.subscribeReceiver am sub))
+                         (catch Error e
+                           (log/error "Caught error while setting up audio subscription" e)))
                        (recur))))]
 
     (fn []

@@ -28,8 +28,11 @@
   (log/info "Starting command dispatcher loop")
   (a/go-loop []
     (when-let [{:keys [user phrase] :as command} (a/<! comprehension/phrase-text-chan)]
-      (let [user-name (discord/->name user)]
-        (log/info (str "Handling phrase from " user-name ": " phrase)))
-      (handle-command! command)
+      (try
+        (let [user-name (discord/->name user)]
+          (log/info (str "Handling phrase from " user-name ": " phrase)))
+        (handle-command! command)
+        (catch Error e
+          (log/error "Caught error in dispatcher loop" e)))
       (recur))))
 
