@@ -6,13 +6,13 @@
             [snowball.util :as util]))
 
 (defn path->data [path]
-  (->> (io/resource path)
+  (->> path
        (slurp)
        (edn/read-string)))
 
 (b/defcomponent value
   (let [base-path "config.base.edn"
-        user-path "config.edn"]
+        user-path "resources/config.edn"]
     (log/info "Loading base config from" base-path "and user config from" user-path)
     (util/deep-merge (path->data base-path)
                      (path->data user-path))))

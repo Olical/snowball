@@ -8,7 +8,9 @@
 (defn -main []
   (let [port (-> (slurp ".nrepl-port") (edn/read-string))]
     (log/info "Starting nREPL server on port" port)
-    (nrepl/start-server :port port :handler (ns-resolve 'cider.nrepl 'cider-nrepl-handler)))
+    (nrepl/start-server :bind "localhost"
+                        :port port
+                        :handler (ns-resolve 'cider.nrepl 'cider-nrepl-handler)))
 
   (log/info "Starting components...")
   (b/set-opts! #{'snowball.config/value

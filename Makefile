@@ -1,9 +1,23 @@
-.PHONY: run outdated
+.PHONY: default run run-container build outdated
 
-run: wake-word-engine
+NAME := olical/snowball
+TAG := $$(git log -1 --pretty=%H)
+IMG := ${NAME}:${TAG}
+LATEST := ${NAME}:latest
+
+default: wake-word-engine run
+
+run:
 	GOOGLE_APPLICATION_CREDENTIALS="$(shell pwd)/resources/google.json" \
 	LD_LIBRARY_PATH="wake-word-engine/jni" \
 	clojure -m snowball.main
+
+run-container:
+	docker run -p 9045:9045 -v $(shell pwd)/resources:/usr/snowball/resources -ti --rm olical/snowball
+
+build: wake-word-engine
+	docker build -t ${IMG} .
+	docker tag ${IMG} ${LATEST}
 
 outdated:
 	clojure -Aoutdated
