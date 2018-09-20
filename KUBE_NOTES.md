@@ -8,23 +8,12 @@ gcloud config set project snowball-[redacted]
 gcloud config set compute/zone europe-west4-b
 
 # Create a minimal cluster
-gcloud container clusters create snowball-cluster \
-    --machine-type=f1-micro \
-    --num-nodes=3 \
-    --disk-size=10 \
-    --no-enable-cloud-logging \
-    --enable-autorepair \
-    --preemptible
+gcloud container clusters create snowball-cluster --num-nodes=1 --preemptible
 
 # Configure kubectl for the new cluster
 gcloud container clusters get-credentials snowball-cluster 
 
-# Scale down to one node because I'm cheap af
-# You have to find the instance group first though
-gcloud compute instance-groups list
-gcloud compute instance-groups managed resize gke-snowball-cluster-default-pool-...-grp --size=1
-
-# We now have a tiny little cluster, add the config
+# Add the config to the new cluster
 # Make sure you've created config/config.edn and config/google.json first!
 kubectl create configmap snowball-config --from-file config/
 
