@@ -1,4 +1,4 @@
-.PHONY: default run run-container build push outdated
+.PHONY: default run run-container build push deploy update outdated
 
 NAME := olical/snowball
 TAG := $$(git log -1 --pretty=%H)
@@ -21,6 +21,12 @@ build: wake-word-engine
 
 push:
 	docker push ${NAME}
+
+deploy:
+	kubectl run snowball --image=olical/snowball:latest
+
+update:
+	kubectl set image deployment/snowball snowball=olical/snowball:latest
 
 outdated:
 	clojure -Aoutdated
