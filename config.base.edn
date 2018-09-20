@@ -12,4 +12,6 @@
                  :stream-bytes-cutoff 1000000      ;; How many bytes can we hold for any given user before we cute it into a phrase.
                  :post-wake-timeout-ms 12000}      ;; How long do we wait for a user to speak after they say the wake phrase.
 
- :speech {:cache {:bucket nil}}}                   ;; A bucket that the speech synthesiser can use to store pre-rendered audio for reuse.
+ :speech {:cache {:bucket nil}}                    ;; A bucket that the speech synthesiser can use to store pre-rendered audio for reuse.
+
+ :command {:music-channel nil}}                    ;; The channel ID that commands for Rythm bot should be sent to.

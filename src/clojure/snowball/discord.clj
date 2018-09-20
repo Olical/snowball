@@ -95,6 +95,10 @@
         (.clear)
         (.queue audio)))))
 
+(defn send! [channel-id message]
+  (when-let [channel (.getChannelByID (default-guild) channel-id)]
+    (.sendMessage channel message)))
+
 (defmethod handle-event! :reconnect-success [_]
   (log/info "Reconnection detected, leaving any existing voice channels to avoid weird state")
   (poll-until-ready)
