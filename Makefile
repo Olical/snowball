@@ -8,7 +8,7 @@ LATEST := ${NAME}:latest
 default: wake-word-engine run
 
 run:
-	run.sh
+	./run.sh
 
 run-container:
 	docker run -p 9045:9045 -v $(shell pwd)/config:/usr/snowball/config -ti --rm olical/snowball
