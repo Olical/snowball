@@ -14,4 +14,4 @@
 
  :speech {:cache {:bucket nil}}                    ;; A bucket that the speech synthesiser can use to store pre-rendered audio for reuse.
 
- :command {:music-channel nil}}                    ;; The channel ID that commands for Rythm bot should be sent to.
+ :command {:music-channel nil}}                    ;; The channel ID that commands for FredBoat should be sent to.

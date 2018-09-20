@@ -8,13 +8,22 @@
             [snowball.speech :as speech]
             [snowball.config :as config]))
 
-(defn music-channel []
-  (if-let [channel (get-in config/value [:command :music-channel])]
-    channel
+(defn acknowledge! []
+  (speech/say!
+    (rand-nth
+      ["You got it!" "Okay." "Sure thing." "Got it."
+       "Yep." "Yes." "Sure." "Cool." "You're the boss."
+       "Aight." "Yarp." "Anything for my princess."])))
+
+(defn music-command! [command]
+  (if-let [music-channel (get-in config/value [:command :music-channel])]
     (do
-      (log/info "Tried to use a Rythm bot command without {:command {:music-channel ...}} being set")
-      (speech/say! "You need to set the command music-channel setting if you want me to control Rythm bot.")
-      nil)))
+      (log/info "Music command" command)
+      (acknowledge!)
+      (discord/send! music-channel (doto (str ";;" command) prn)))
+    (do
+      (log/info "Tried to use a FredBoat command without {:command {:music-channel ...}} being set")
+      (speech/say! "You need to set the command music-channel setting if you want me to control FredBoat."))))
 
 (defn handle-command! [{:keys [phrase]}]
   (condp re-find phrase
@@ -31,31 +40,23 @@
 
     #"play (.*)" :>>
     (fn [[_ song]]
-      (log/info "Playing" song)
-      (when-let [music-channel (music-channel)]
-        (speech/say! (str "Playing " song))
-        (discord/send! music-channel (str "!play " song))))
+      (music-command! (str "play " song)))
 
     #"(pause|stop)" :>>
     (fn [_]
-      (log/info "Pausing")
-      (when-let [music-channel (music-channel)]
-        (speech/say! "Pausing")
-        (discord/send! music-channel (str "!pause"))))
+      (music-command! "pause"))
 
     #"resume" :>>
     (fn [_]
-      (log/info "Resuming")
-      (when-let [music-channel (music-channel)]
-        (speech/say! "Resuming")
-        (discord/send! music-channel (str "!resume"))))
+      (music-command! "resume"))
 
     #"skip" :>>
     (fn [_]
-      (log/info "Skipping")
-      (when-let [music-channel (music-channel)]
-        (speech/say! "Skipping")
-        (discord/send! music-channel (str "!skip"))))
+      (music-command! "skip"))
+
+    #"summon" :>>
+    (fn [_]
+      (music-command! "join"))
 
     (do
       (log/info "Couldn't find a matching command")
