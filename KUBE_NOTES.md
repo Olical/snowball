@@ -29,6 +29,9 @@ kubectl edit deployments snowball
 
 # Check the logs with
 kubectl logs deployment/snowball -f
+
+# Redeploy by deleting the current podupdate pod latest tag
+kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | xargs kubectl delete pod
 ```
 
 ## YAML for `kubectl edit deployments snowball`
