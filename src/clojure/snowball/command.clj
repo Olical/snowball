@@ -16,14 +16,18 @@
        "Aight." "Yarp." "Anything for my princess."])))
 
 (defn music-command! [command]
-  (if-let [music-channel (get-in config/value [:command :music-channel])]
-    (do
-      (log/info "Music command" command)
-      (acknowledge!)
-      (discord/send! music-channel (doto (str ";;" command) prn)))
-    (do
-      (log/info "Tried to use a FredBoat command without {:command {:music-channel ...}} being set")
-      (speech/say! "You need to set the command music-channel setting if you want me to control FredBoat."))))
+  (try
+  (future
+    (if-let [music-channel (get-in config/value [:command :music-channel])]
+      (do
+        (log/info "Music command" command)
+        (acknowledge!)
+        (discord/send! music-channel (str "!!!" command)))
+      (do
+        (log/info "Tried to use a FredBoat command without {:command {:music-channel ...}} being set")
+        (speech/say! "You need to set the command music-channel setting if you want me to control FredBoat."))))
+  (catch Error e
+    (log/error "Error while executing music command"))))
 
 (defn handle-command! [{:keys [phrase]}]
   (condp re-find phrase
@@ -42,21 +46,13 @@
     (fn [[_ song]]
       (music-command! (str "play " song)))
 
-    #"(pause|stop)" :>>
+    #"(pause|stop|resume)" :>>
     (fn [_]
       (music-command! "pause"))
-
-    #"resume" :>>
-    (fn [_]
-      (music-command! "resume"))
 
     #"skip" :>>
     (fn [_]
       (music-command! "skip"))
-
-    #"summon" :>>
-    (fn [_]
-      (music-command! "join"))
 
     (do
       (log/info "Couldn't find a matching command")
