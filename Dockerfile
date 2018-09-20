@@ -8,4 +8,4 @@ RUN clojure -e :ready
 
 COPY . /usr/snowball
 
-CMD ["run.sh"]
+CMD ["bash", "run.sh"]
