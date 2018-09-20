@@ -1,3 +1,5 @@
+;; Override this with your own `config/config.edn`.
+
 {:discord {:token nil                              ;; Your Discord bot token.
            :poll-ms 1000}                          ;; How long we should wait before asking Discord if we're connected again.
 
