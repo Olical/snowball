@@ -72,4 +72,3 @@
         (catch Error e
           (log/error "Caught error in dispatcher loop" e)))
       (recur))))
-
