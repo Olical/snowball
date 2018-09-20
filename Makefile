@@ -1,4 +1,4 @@
-.PHONY: default run run-container build outdated
+.PHONY: default run run-container build push outdated
 
 NAME := olical/snowball
 TAG := $$(git log -1 --pretty=%H)
@@ -18,6 +18,9 @@ run-container:
 build: wake-word-engine
 	docker build -t ${IMG} .
 	docker tag ${IMG} ${LATEST}
+
+push:
+	docker push ${NAME}
 
 outdated:
 	clojure -Aoutdated
