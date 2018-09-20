@@ -8,7 +8,7 @@
 (defn -main []
   (let [port (-> (slurp ".nrepl-port") (edn/read-string))]
     (log/info "Starting nREPL server on port" port)
-    (nrepl/start-server :bind "localhost"
+    (nrepl/start-server :bind "0.0.0.0"
                         :port port
                         :handler (ns-resolve 'cider.nrepl 'cider-nrepl-handler)))
 

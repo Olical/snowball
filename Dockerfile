@@ -1,5 +1,6 @@
-FROM clojure:tools-deps-1.9.0.394-alpine
-RUN apk add --no-cache make
+FROM clojure:tools-deps-1.9.0.394
+
+RUN apt-get update && apt-get install make
 
 RUN mkdir -p /usr/snowball
 WORKDIR /usr/snowball
