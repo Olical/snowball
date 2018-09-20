@@ -23,10 +23,10 @@ push:
 	docker push ${NAME}
 
 deploy:
-	kubectl run snowball --image=olical/snowball:latest
+	kubectl run snowball --image=${IMG}
 
 update:
-	kubectl set image deployment/snowball snowball=olical/snowball:latest
+	kubectl set image deployment/snowball snowball=${IMG}
 
 logs:
 	kubectl logs deployment/snowball -f
