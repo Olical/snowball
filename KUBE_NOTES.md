@@ -9,7 +9,7 @@ gcloud config set compute/zone europe-west4-b
 
 # Create a minimal cluster
 # TODO: Use a smaller disk
-gcloud container clusters create snowball-cluster --num-nodes=1 --preemptible
+gcloud container clusters create snowball-cluster --num-nodes=1 --disk-size=20 --preemptible
 
 # Configure kubectl for the new cluster
 gcloud container clusters get-credentials snowball-cluster 
@@ -42,8 +42,8 @@ We add `volumeMounts` and `volumes`.
 ```yaml
     spec:
       containers:
-      - image: olical/snowball
-        imagePullPolicy: Always
+      - image: olical/snowball:...
+        imagePullPolicy: IfNotPresent
         name: snowball
         resources: {}
         terminationMessagePath: /dev/termination-log
@@ -226,7 +226,7 @@ i18nFile =
     spec:
       containers:
       - image: justsomebots/musicbot:1.9.8
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name: musicbot
         resources: {}
         terminationMessagePath: /dev/termination-log
