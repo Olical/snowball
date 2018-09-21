@@ -26,6 +26,7 @@ kubectl create configmap snowball-config --from-file config/ -o yaml --dry-run |
 kubectl run snowball --image=olical/snowball:...
 
 # Update the deployment and add the YAML below, it maps the config into the container
+# I've also set some lower CPU requirements in this YAML to get them to fit
 kubectl edit deployments snowball
 
 # Check the logs with this
@@ -51,6 +52,9 @@ We add `volumeMounts` and `volumes`.
         volumeMounts:
         - name: config-volume
           mountPath: /usr/snowball/config
+        resources:
+          requests:
+            cpu: "250m"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -233,7 +237,10 @@ i18nFile =
         terminationMessagePolicy: File
         volumeMounts:
         - name: config-volume
-          mountPath: /usr/src/musicbot/config/options.ini
+          mountPath: /usr/src/musicbot/config
+        resources:
+          requests:
+            cpu: "250m"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
