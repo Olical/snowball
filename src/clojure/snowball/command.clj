@@ -22,7 +22,7 @@
       (do
         (log/info "Music command" command)
         (acknowledge!)
-        (discord/send! music-channel (str "!!!" command)))
+        (discord/send! music-channel (str "!" command)))
       (do
         (log/info "Tried to use a music bot command without {:command {:music-channel ...}} being set")
         (speech/say! "You need to set the command music-channel setting if you want me to control the music bot"))))
@@ -46,9 +46,13 @@
     (fn [[_ song]]
       (music-command! (str "play " song)))
 
-    #"(pause|stop|resume)" :>>
+    #"(pause|stop)" :>>
     (fn [_]
       (music-command! "pause"))
+
+    #"(resume|unpause)" :>>
+    (fn [_]
+      (music-command! "resume"))
 
     #"skip" :>>
     (fn [_]
