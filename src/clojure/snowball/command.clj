@@ -24,8 +24,8 @@
         (acknowledge!)
         (discord/send! music-channel (str "!!!" command)))
       (do
-        (log/info "Tried to use a FredBoat command without {:command {:music-channel ...}} being set")
-        (speech/say! "You need to set the command music-channel setting if you want me to control FredBoat."))))
+        (log/info "Tried to use a music bot command without {:command {:music-channel ...}} being set")
+        (speech/say! "You need to set the command music-channel setting if you want me to control the music bot"))))
   (catch Error e
     (log/error "Error while executing music command"))))
 
