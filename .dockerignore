@@ -1,5 +1,6 @@
 /.git/
 /config/
+/musicbot-config/
 /.cpcache/
 /wake-word-engine/Porcupine/
 !/wake-word-engine/Porcupine/lib/common/porcupine_params.pv

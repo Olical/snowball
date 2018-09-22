@@ -1,4 +1,6 @@
 *.class
-/config/
 /.cpcache/
+/config/
+/musicbot-config/options.ini
+/musicbot-config/permissions.ini
 /wake-word-engine/
