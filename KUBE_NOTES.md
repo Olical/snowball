@@ -77,7 +77,7 @@ kubectl create configmap musicbot-config --from-file musicbot-config/
 kubectl create configmap musicbot-i18n --from-file musicbot-config/i18n
 
 # Deploy the container
-kubectl run musicbot --image=justsomebots/musicbot:1.9.8
+kubectl run musicbot --image=justsomebots/musicbot:review
 
 # Update the YAML just like snowball and add the new config map, example below
 kubectl edit deployments musicbot
@@ -88,7 +88,7 @@ kubectl edit deployments musicbot
 ```yaml
     spec:
       containers:
-      - image: justsomebots/musicbot:1.9.8
+      - image: justsomebots/musicbot:review
         imagePullPolicy: IfNotPresent
         name: musicbot
         resources: {}
