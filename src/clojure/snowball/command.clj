@@ -18,14 +18,20 @@
 (defn music-command! [command]
   (try
   (future
-    (if-let [music-channel (get-in config/value [:command :music-channel])]
+    (if-let [{:keys [channel user]} (get-in config/value [:command :music])]
       (do
         (log/info "Music command" command)
         (acknowledge!)
-        (discord/send! music-channel (str "!" command)))
+
+        (when (and user
+                   (not= command "summon")
+                   (every? #(not= user (discord/->id %)) (discord/channel-users (discord/current-channel))))
+          (discord/send! channel "!summon"))
+
+        (discord/send! channel (str "!" command)))
       (do
-        (log/info "Tried to use a music bot command without {:command {:music-channel ...}} being set")
-        (speech/say! "You need to set the command music-channel setting if you want me to control the music bot"))))
+        (log/info "Tried to use a music bot command without {:command {:music {:channel ...}}} being set")
+        (speech/say! "You need to set the command music channel setting if you want me to control the music bot"))))
   (catch Error e
     (log/error "Error while executing music command"))))
 
@@ -57,6 +63,10 @@
     #"skip" :>>
     (fn [_]
       (music-command! "skip"))
+
+    #"summon" :>>
+    (fn [_]
+      (music-command! "summon"))
 
     (do
       (log/info "Couldn't find a matching command")

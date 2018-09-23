@@ -83,7 +83,8 @@
        (byte-array)))
 
 (defn speech-context-phrases []
-  (loop [phrases (->> (concat (take 400 (discord/guild-users))
+  (loop [phrases (->> (concat (take 50 (get-in config/value [:comprehension :context-phrases]))
+                              (take 350 (discord/guild-users))
                               (take 50 (discord/guild-text-channels))
                               (take 50 (discord/guild-voice-channels)))
                       (into [] (comp (map #(.getName %))

@@ -83,5 +83,6 @@
 
 (defn say! [message]
   (future
+    (log/info "Saying" message)
     (->> (synthesise message)
          (discord/play!))))

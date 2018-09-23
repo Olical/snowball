@@ -97,6 +97,7 @@
 
 (defn send! [channel-id message]
   (when-let [channel (.getChannelByID (default-guild) channel-id)]
+    (log/info "Sending message to" channel-id "-" message)
     (.sendMessage channel message)))
 
 (defmethod handle-event! :reconnect-success [_]
