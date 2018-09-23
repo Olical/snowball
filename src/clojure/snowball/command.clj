@@ -17,23 +17,23 @@
 
 (defn music-command! [command]
   (try
-  (future
-    (if-let [{:keys [channel user]} (get-in config/value [:command :music])]
-      (do
-        (log/info "Music command" command)
-        (acknowledge!)
+    (future
+      (if-let [{:keys [channel user]} (get-in config/value [:command :music])]
+        (do
+          (log/info "Music command" command)
+          (acknowledge!)
 
-        (when (and user
-                   (not= command "summon")
-                   (every? #(not= user (discord/->id %)) (discord/channel-users (discord/current-channel))))
-          (discord/send! channel "!summon"))
+          (when (and user
+                     (not= command "summon")
+                     (every? #(not= user (discord/->id %)) (discord/channel-users (discord/current-channel))))
+            (discord/send! channel "!summon"))
 
-        (discord/send! channel (str "!" command)))
-      (do
-        (log/info "Tried to use a music bot command without {:command {:music {:channel ...}}} being set")
-        (speech/say! "You need to set the command music channel setting if you want me to control the music bot"))))
-  (catch Error e
-    (log/error "Error while executing music command"))))
+          (discord/send! channel (str "!" command)))
+        (do
+          (log/info "Tried to use a music bot command without {:command {:music {:channel ...}}} being set")
+          (speech/say! "You need to set the command music channel setting if you want me to control the music bot"))))
+    (catch Error e
+      (log/error "Error while executing music command" e))))
 
 (defn handle-command! [{:keys [phrase]}]
   (condp re-find phrase
@@ -74,6 +74,13 @@
 
 (b/defcomponent dispatcher {:bounce/deps #{comprehension/phrase-text-chan speech/synthesiser config/value}}
   (log/info "Starting command dispatcher loop")
+
+  (swap! comprehension/extra-phrases! into
+         #{"say" "play" "pause" "pause the music" "stop"
+           "stop the music" "resume" "resume the music"
+           "unpause" "unpause the music" "skip"
+           "skip this song" "summon" "dismiss"})
+
   (a/go-loop []
     (when-let [{:keys [user phrase] :as command} (a/<! comprehension/phrase-text-chan)]
       (try

@@ -10,10 +10,7 @@
 
  :comprehension {:phrase-debounce-ms 350           ;; How long can someone not speak for before we cut it as a phrase and try to comprehend it.
                  :stream-bytes-cutoff 1000000      ;; How many bytes can we hold for any given user before we cute it into a phrase.
-                 :post-wake-timeout-ms 12000       ;; How long do we wait for a user to speak after they say the wake phrase.
-
-                                                   ;; Some hints to help Google recognise them in speech.
-                 :context-phrases #{"say" "play" "summon"}}
+                 :post-wake-timeout-ms 12000}      ;; How long do we wait for a user to speak after they say the wake phrase.
 
  :speech {:cache {:bucket nil}}                    ;; A bucket that the speech synthesiser can use to store pre-rendered audio for reuse.
 

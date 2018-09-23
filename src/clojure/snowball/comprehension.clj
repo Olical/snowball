@@ -82,9 +82,11 @@
        (flatten)
        (byte-array)))
 
+(def extra-phrases! (atom nil))
+
 (defn speech-context-phrases []
-  (loop [phrases (->> (concat (take 50 (get-in config/value [:comprehension :context-phrases]))
-                              (take 350 (discord/guild-users))
+  (loop [phrases (->> (concat (take 350 (discord/guild-users))
+                              (take 50 @extra-phrases!)
                               (take 50 (discord/guild-text-channels))
                               (take 50 (discord/guild-voice-channels)))
                       (into [] (comp (map #(.getName %))
@@ -114,6 +116,7 @@
 
 (b/defcomponent phrase-text-chan {:bounce/deps #{phrase-audio-chan speech/synthesiser}}
   (log/info "Starting speech to text systems")
+  (reset! extra-phrases! #{})
   (let [speech-client (.. SpeechClient (create))
         phrase-text-chan (a/chan (a/sliding-buffer 100))
         porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv"
