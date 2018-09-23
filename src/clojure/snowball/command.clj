@@ -68,6 +68,34 @@
     (fn [_]
       (music-command! "summon"))
 
+    #"dismiss" :>>
+    (fn [_]
+      (music-command! "disconnect"))
+
+    #"clear" :>>
+    (fn [_]
+      (music-command! "clear"))
+
+    #"set.*?volume.*?(\d+)" :>>
+    (fn [[_ volume]]
+      (music-command! (str "volume " volume)))
+
+    #"(increase|up).*?(music|volume).*?(\d+)" :>>
+    (fn [[_ _ _ volume]]
+      (music-command! (str "volume +" volume)))
+
+    #"(decrease|down).*?(music|volume).*?(\d+)" :>>
+    (fn [[_ _ _ volume]]
+      (music-command! (str "volume -" volume)))
+
+    #"(increase|up).*?(music|volume)" :>>
+    (fn [_]
+      (music-command! "volume +15"))
+
+    #"(decrease|down).*?(music|volume)" :>>
+    (fn [_]
+      (music-command! "volume -15"))
+
     (do
       (log/info "Couldn't find a matching command")
       (speech/say! "Sorry, I didn't recognise that command."))))
@@ -78,8 +106,9 @@
   (swap! comprehension/extra-phrases! into
          #{"say" "play" "pause" "pause the music" "stop"
            "stop the music" "resume" "resume the music"
-           "unpause" "unpause the music" "skip"
-           "skip this song" "summon" "dismiss"})
+           "unpause" "unpause the music" "skip" "skip this song"
+           "summon" "dismiss" "clear" "clear the queue" "reduce"
+           "increase" "volume" "music" "up" "down"})
 
   (a/go-loop []
     (when-let [{:keys [user phrase] :as command} (a/<! comprehension/phrase-text-chan)]
