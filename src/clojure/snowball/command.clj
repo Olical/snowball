@@ -4,6 +4,7 @@
             [bounce.system :as b]
             [taoensso.timbre :as log]
             [snowball.comprehension :as comprehension]
+            [snowball.util :as util]
             [snowball.discord :as discord]
             [snowball.speech :as speech]
             [snowball.config :as config]))
@@ -32,10 +33,10 @@
         (do
           (log/info "Tried to use a music bot command without {:command {:music {:channel ...}}} being set")
           (speech/say! "You need to set the command music channel setting if you want me to control the music bot"))))
-    (catch Error e
+    (catch Exception e
       (log/error "Error while executing music command" e))))
 
-(defn handle-command! [{:keys [phrase]}]
+(defn handle-command! [{:keys [phrase user]}]
   (condp re-find phrase
 
     #"say (.*)" :>>
@@ -76,25 +77,60 @@
     (fn [_]
       (music-command! "clear"))
 
-    #"set.*?volume.*?(\d+)" :>>
-    (fn [[_ volume]]
-      (music-command! (str "volume " volume)))
+    #".*volume.*" :>>
+    (fn [command]
+      (condp re-find command
+        #"(increase|up|raise).*?(\d+)" :>>
+        (fn [[_ _ amount]]
+          (music-command! (str "volume +" amount)))
 
-    #"(increase|up).*?(music|volume).*?(\d+)" :>>
-    (fn [[_ _ _ volume]]
-      (music-command! (str "volume +" volume)))
+        #"(decrease|down|lower).*?(\d+)" :>>
+        (fn [[_ _ amount]]
+          (music-command! (str "volume -" amount)))
 
-    #"(decrease|down).*?(music|volume).*?(\d+)" :>>
-    (fn [[_ _ _ volume]]
-      (music-command! (str "volume -" volume)))
+        #"(increase|up|raise)" :>>
+        (fn [_]
+          (music-command! "volume +15"))
 
-    #"(increase|up).*?(music|volume)" :>>
-    (fn [_]
-      (music-command! "volume +15"))
+        #"(decrease|down|lower)" :>>
+        (fn [_]
+          (music-command! "volume -15"))
 
-    #"(decrease|down).*?(music|volume)" :>>
-    (fn [_]
-      (music-command! "volume -15"))
+        #"(\d+)" :>>
+        (fn [[_ amount]]
+          (music-command! (str "volume " amount)))
+
+        (speech/say! "I need at least a number to set the volume.")))
+
+    #".*move.*" :>>
+    (fn [command]
+      (letfn [(->name [x] (when x (-> x (cond-> (not (string? x)) discord/->name) util/sanitise-entity)))
+              (->names-list [xs] (str/join ", " (map discord/->name xs)))
+              (included [s targets] (filter #(str/includes? s (->name %)) targets))]
+        (let [channels (discord/channels)
+              users (into #{} (mapcat discord/channel-users) channels)
+              target-channel (->> (included command (conj channels "this channel" "my channel" "our channel" "here"))
+                                  (map (fn [x]
+                                            (case x
+                                              ("this channel" "my channel" "our channel" "here") (discord/current-channel)
+                                              x)))
+                                  (first))
+              target-users (into #{}
+                                 (mapcat (fn [x]
+                                           (case x
+                                             ("me" "myself") [user]
+                                             "everyone" users
+                                             [x])))
+                                 (included command (conj users "me" "myself" "everyone")))]
+          (if (and target-channel (seq target-users))
+            (do
+              (log/info "Moving" (->names-list target-users) "to" (->name target-channel))
+              (acknowledge!)
+              (doseq [user target-users]
+                (discord/move-user-to-voice-channel user target-channel)))
+            (do
+              (log/info "Invalid move for users" (->names-list target-users) "to" (->name target-channel))
+              (speech/say! "I need usernames and a channel name to do that."))))))
 
     (do
       (log/info "Couldn't find a matching command")
@@ -108,7 +144,8 @@
            "stop the music" "resume" "resume the music"
            "unpause" "unpause the music" "skip" "skip this song"
            "summon" "dismiss" "clear" "clear the queue" "reduce"
-           "increase" "volume" "music" "up" "down"})
+           "increase" "volume" "music" "up" "down" "move"
+           "everyone" "me" "myself" "here" "this" "my" "our" "channel"})
 
   (a/go-loop []
     (when-let [{:keys [user phrase] :as command} (a/<! comprehension/phrase-text-chan)]
@@ -116,6 +153,6 @@
         (let [user-name (discord/->name user)]
           (log/info (str "Handling phrase from " user-name ": " phrase)))
         (handle-command! command)
-        (catch Error e
+        (catch Exception e
           (log/error "Caught error in dispatcher loop" e)))
       (recur))))

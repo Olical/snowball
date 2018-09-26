@@ -35,7 +35,7 @@
                            (not (discord/has-speaking-users? current-channel)))
                        desired-channel)
                   (discord/join! desired-channel)))
-              (catch Error e
+              (catch Exception e
                 (log/error "Caught an error in presence loop" e)))
             (recur)))
         (b/with-stop

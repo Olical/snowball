@@ -97,9 +97,8 @@
       phrases)))
 
 (defn sanitised-entities []
-  (letfn [(sanitise [entity] (str/replace entity #"[^\w\d-\s]" ""))
-          (trim [entity] (subs entity 0 (min (count entity) 100)))
-          (sanitised-map [entities] (into {} (map (juxt (comp trim sanitise discord/->name) identity)) entities))]
+  (letfn [(trim [entity] (subs entity 0 (min (count entity) 100)))
+          (sanitised-map [entities] (into {} (map (juxt (comp util/sanitise-entity discord/->name) identity)) entities))]
     {:users (sanitised-map (discord/guild-users))
      :text-channels (sanitised-map (discord/guild-text-channels))
      :voice-channels (sanitised-map (discord/guild-voice-channels))}))

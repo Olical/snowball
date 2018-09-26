@@ -88,6 +88,13 @@
 (defn guild-voice-channels []
   (some-> (default-guild) .getVoiceChannels))
 
+(defn move-user-to-voice-channel [user channel]
+  (when (and user channel)
+    (try
+      (.moveToVoiceChannel user channel)
+      (catch Exception e
+        (log/warn "Tried to move a user to a voice channel that isn't connected to voice already")))))
+
 (defn play! [audio]
   (when audio
     (when-let [guild (default-guild)]
@@ -124,12 +131,12 @@
                                        (try
                                          (when-not (bot? user)
                                            (f (AudioEvent. audio user)))
-                                         (catch Error e
+                                         (catch Exception e
                                            (log/error "Caught error while passing audio event to subscription handler" e)))))]
                            (reset! sub! sub)
                            (log/info "Audio manager exists, subscribing to audio")
                            (.subscribeReceiver am sub))
-                         (catch Error e
+                         (catch Exception e
                            (log/error "Caught error while setting up audio subscription" e)))
                        (recur))))]
 

@@ -1,5 +1,6 @@
 (ns snowball.util
-  (:require [clojure.core.async :as a]
+  (:require [clojure.string :as str]
+            [clojure.core.async :as a]
             [taoensso.timbre :as log]))
 
 (defn poll-while [poll-ms pred-fn body-fn]
@@ -44,3 +45,8 @@
 
 (defn deep-merge [& maps]
   (apply deep-merge-with (fn [_ v] v) maps))
+
+(defn sanitise-entity [entity]
+  (-> entity
+      (str/replace #"[^\w\d-\s]" "")
+      (str/trim)))
