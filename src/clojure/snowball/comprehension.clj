@@ -84,18 +84,6 @@
 
 (def extra-phrases! (atom nil))
 
-(defn speech-context-phrases []
-  (loop [phrases (->> (concat (take 350 (discord/guild-users))
-                              (take 50 @extra-phrases!)
-                              (take 50 (discord/guild-text-channels))
-                              (take 50 (discord/guild-voice-channels)))
-                      (into [] (comp (map discord/->name)
-                                     (map util/sanitise-entity)
-                                     (map #(subs % 0 (min (count %) 100))))))]
-    (if (> (reduce + (map count phrases)) 10000)
-      (recur (subvec phrases 1))
-      phrases)))
-
 (defn sanitised-entities []
   (letfn [(trim [entity] (subs entity 0 (min (count entity) 100)))
           (sanitised-map [entities] (into {} (map (juxt (comp util/sanitise-entity discord/->name) identity)) entities))]
@@ -108,7 +96,10 @@
         users (-> entity-map :users keys)
         text-channels (-> entity-map :text-channels keys)
         voice-channels (-> entity-map :voice-channels keys)]
-    (loop [entities (concat (take 400 users) (take 50 text-channels) (take 50 voice-channels))]
+    (loop [entities (concat (take 50 @extra-phrases!)
+                            (take 350 users)
+                            (take 50 text-channels)
+                            (take 50 voice-channels))]
       (if (< (reduce + (map count entities)) 10000)
         (vec entities)
         (recur (rest entities))))))
@@ -169,9 +160,11 @@
                           ;; If we have a transcription result, put it onto the output channel.
                           (if (seq results)
                             (doseq [result results]
-                              (let [transcript (.. result (getAlternativesList) (get 0) (getTranscript))]
+                              (let [transcript (-> (.. result (getAlternativesList) (get 0) (getTranscript))
+                                                   (str/lower-case))]
                                 (log/info  "Speech recognition transcript result:" transcript)
-                                (a/put! phrase-text-chan {:user user, :phrase transcript})))
+                                (a/put! phrase-text-chan {:user user
+                                                          :phrase transcript})))
                             (do
                               (log/info "No results from Google speech recognition")
                               (speech/say! "I can't understand you, please try again.")))))

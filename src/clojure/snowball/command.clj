@@ -125,7 +125,6 @@
           (if (and target-channel (seq target-users))
             (do
               (log/info "Moving" (->names-list target-users) "to" (->name target-channel))
-              (acknowledge!)
               (doseq [user target-users]
                 (discord/move-user-to-voice-channel user target-channel)))
             (do
