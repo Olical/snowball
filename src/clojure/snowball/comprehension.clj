@@ -89,8 +89,8 @@
                               (take 50 @extra-phrases!)
                               (take 50 (discord/guild-text-channels))
                               (take 50 (discord/guild-voice-channels)))
-                      (into [] (comp (map #(.getName %))
-                                     (map #(str/replace % #"[^\w\d-\s]" ""))
+                      (into [] (comp (map discord/->name)
+                                     (map util/sanitise-entity)
                                      (map #(subs % 0 (min (count %) 100))))))]
     (if (> (reduce + (map count phrases)) 10000)
       (recur (subvec phrases 1))
