@@ -48,5 +48,6 @@
 
 (defn sanitise-entity [entity]
   (-> entity
+      (str/lower-case)
       (str/replace #"[^\w\d-\s]" "")
       (str/trim)))
