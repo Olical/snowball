@@ -4,7 +4,7 @@ A voice activated chat bot that sits in a [Discord][] server and joins audio cha
 
 ## Key features
 
- * Control your music: `play hurricane highlife`,`turn the volume down`.
+ * Control your music: `play hurricane highlife`, `turn the volume down`.
  * Move users around: `move me to channel 2`, `move everyone to my channel`, `move Olical and Photan to channel 1`.
  * Minimal required configuration.
  * Woken by "hey snowball", uses very little CPU.
