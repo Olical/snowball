@@ -148,5 +148,5 @@ Do what you want. Learn as much as you can. Unlicense more software.
 [cloud-speech]: https://console.cloud.google.com/apis/api/speech.googleapis.com/overview
 [cloud-text-to-speech]: https://console.cloud.google.com/apis/api/texttospeech.googleapis.com/overview
 [cloud-storage]: https://console.cloud.google.com/storage/browser
-[kube-notes]: blob/master/KUBE_NOTES.md
-[commands]: blob/master/src/clojure/snowball/command.clj
+[kube-notes]: KUBE_NOTES.md
+[commands]: src/clojure/snowball/command.clj
