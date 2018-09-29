@@ -13,7 +13,9 @@
                  :post-wake-timeout-ms 12000       ;; How long do we wait for a user to speak after they say the wake phrase.
                  :language-code "en-GB"}           ;; Language code to send to Google for comprehension. You could try en-US.
 
- :speech {:cache {:bucket nil}}                    ;; A bucket that the speech synthesiser can use to store pre-rendered audio for reuse.
+ :speech {:cache {:bucket nil}                     ;; A bucket that the speech synthesiser can use to store pre-rendered audio for reuse.
+          :language-code "en_us"                   ;; Let Google know what accent we want, "en_gb" would also work.
+          :gender :male}                           ;; Use a :female or :male voice.
 
  :command {:music {:channel nil                    ;; The channel ID that commands for the music bot should be sent to.
                    :user nil}}}                    ;; The user to check for, if it's not in voice it'll be summoned.

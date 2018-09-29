@@ -52,21 +52,25 @@
         (.. blob
             (getContent (make-array com.google.cloud.storage.Blob$BlobSourceOption 0)))))))
 
-(b/defcomponent synthesiser {:bounce/deps #{discord/client}}
+(b/defcomponent synthesiser {:bounce/deps #{discord/client config/value}}
   (log/info "Starting up speech client")
-  (-> {:client (TextToSpeechClient/create)
-       :voice (.. VoiceSelectionParams
-                  newBuilder
-                  (setLanguageCode "en_us")
-                  (setSsmlGender SsmlVoiceGender/MALE)
-                  build)
-       :audio-config (.. AudioConfig
-                         newBuilder
-                         (setAudioEncoding AudioEncoding/MP3)
-                         build)}
-      (b/with-stop
-        (log/info "Shutting down speech client")
-        (.close (:client synthesiser)))))
+  (let [language-code (get-in config/value [:speech :language-code])
+        gender (case (get-in config/value [:speech :gender])
+                 :male SsmlVoiceGender/MALE
+                 :female SsmlVoiceGender/FEMALE)]
+    (-> {:client (TextToSpeechClient/create)
+         :voice (.. VoiceSelectionParams
+                    newBuilder
+                    (setLanguageCode language-code)
+                    (setSsmlGender gender)
+                    build)
+         :audio-config (.. AudioConfig
+                           newBuilder
+                           (setAudioEncoding AudioEncoding/MP3)
+                           build)}
+        (b/with-stop
+          (log/info "Shutting down speech client")
+          (.close (:client synthesiser))))))
 
 (defn synthesise [message]
   (if-let [cache-input-stream (read-cache message)]
