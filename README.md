@@ -75,7 +75,7 @@ Once you have the CLI installed (it's available in most package managers) you ca
 If you know how to use Docker this'll be really straightforward, if you don't, go learn how to use Docker first. The tag in this block is the currently recommended version.
 
 ```bash
-docker run -ti --rm -v (pwd)/config:/usr/snowball/config olical/snowball:ff3bb42ef2c22ff6197e311c230845738bf506fa
+docker run -ti --rm -v $(pwd)/config:/usr/snowball/config olical/snowball:ff3bb42ef2c22ff6197e311c230845738bf506fa
 ```
 
 I run my instance on a Kubernetes cluster I created within GCP, I noted the steps I took in [`KUBE_NOTES.md`][kube-notes] which may help others get their own instances running cheaply.
