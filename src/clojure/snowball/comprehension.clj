@@ -113,7 +113,8 @@
                               "wake-word-engine/hey_snowball_linux.ppn"
                               0.5)
         frame-length (.getFrameLength porcupine)
-        sample-rate (.getSampleRate porcupine)]
+        sample-rate (.getSampleRate porcupine)
+        language-code (get-in config/value [:comprehension :language-code])]
 
     (a/go-loop []
       ;; Wait for audio from a user in the voice channel.
@@ -145,7 +146,7 @@
                                                      (newBuilder)
                                                      (setEncoding (.. com.google.cloud.speech.v1p1beta1.RecognitionConfig$AudioEncoding LINEAR16))
                                                      (setSampleRateHertz 16000)
-                                                     (setLanguageCode "en-GB")
+                                                     (setLanguageCode language-code)
                                                      (addSpeechContexts speech-context)
                                                      (build))
                               recognition-audio (.. RecognitionAudio
