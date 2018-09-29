@@ -7,14 +7,23 @@ A voice activated chat bot that sits in a [Discord][] server and joins audio cha
 This would take place entirely over voice, I'd just join a voice channel and Snowball would turn up.
 
 > Olical: Hey Snowball
+>
 > Snowball: Hey Olical
+>
 > Olical: Move everyone to my channel
+>
 > Snowball: You got it.
+>
 > [everyone is moved to my channel]
+>
 > Olical: Hey Snowball
+>
 > Snowball: Hey Olical
+>
 > Olical: Play Darude Sandstorm 10 hours bass boosted
+>
 > Snowball: Sure
+>
 > [beautiful music starts playing]
 
 ## Key features
@@ -92,7 +101,7 @@ To give a command you need to say "hey snowball" and wait for acknowledgement, S
    * A channel name, "this channel", "my channel", "our channel" or "here" can be used to select a channel.
      * "move everyone to this channel"
      * "move me to channel 2"
-     * "could you move Photan to the naughty corner?"
+     * "could you move Photan to the naughty corner"
 
 There's a few more very obvious music bot commands.
 
