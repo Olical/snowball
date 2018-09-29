@@ -1,6 +1,6 @@
 # Snowball
 
-A voice activated chat bot that sits in a [Discord][] server and joins audio channels with users.
+A voice activated bot that sits in a [Discord][] server and joins audio channels with users.
 
 ## Example
 
