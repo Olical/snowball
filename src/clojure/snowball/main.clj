@@ -1,17 +1,11 @@
 (ns snowball.main
-  (:require [clojure.edn :as edn]
-            [clojure.tools.nrepl.server :as nrepl]
-            [cider.nrepl]
+  (:require [clojure.core.server :as server]
+            [clojure.edn :as edn]
             [bounce.system :as b]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [snowball.config :as config]))
 
 (defn -main []
-  (let [port (-> (slurp ".nrepl-port") (edn/read-string))]
-    (log/info "Starting nREPL server on port" port)
-    (nrepl/start-server :bind "0.0.0.0"
-                        :port port
-                        :handler (ns-resolve 'cider.nrepl 'cider-nrepl-handler)))
-
   (log/info "Starting components...")
   (b/set-opts! #{'snowball.config/value
                  'snowball.discord/audio-chan
@@ -20,4 +14,11 @@
                  'snowball.presence/poller
                  'snowball.command/dispatcher})
   (b/start!)
+
+  (let [port (get-in config/value [:system :socket-repl-port])]
+    (log/info "Starting socket REPL on port" port)
+    (server/start-server {:name "system"
+                          :port port
+                          :accept 'clojure.core.server/repl}))
+
   (log/info "Everything's up and running!"))

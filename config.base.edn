@@ -1,6 +1,8 @@
 ;; Override this with your own `config/config.edn`.
 
-{:discord {:token nil                              ;; Your Discord bot token.
+{:system {:socket-repl-port 9045}                  ;; Port to start the Clojure socket REPL on.
+ 
+ :discord {:token nil                              ;; Your Discord bot token.
            :poll-ms 1000}                          ;; How long we should wait before asking Discord if we're connected again.
 
  :presence {:poll-ms 1000                          ;; How long we should wait before checking if we should join another channel.
