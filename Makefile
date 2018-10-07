@@ -23,7 +23,7 @@ push:
 outdated:
 	clojure -Aoutdated
 
-wake-word-engine: wake-word-engine/Porcupine wake-word-engine/hey_snowball_linux.ppn wake-word-engine/jni/libpv_porcupine.so
+wake-word-engine: wake-word-engine/Porcupine wake-word-engine/hey_snowball_linux.ppn wake-word-engine/jni/libpv_porcupine.so src/java/snowball/porcupine/Porcupine.class
 
 wake-word-engine/Porcupine:
 	mkdir -p wake-word-engine
@@ -33,7 +33,7 @@ wake-word-engine/hey_snowball_linux.ppn: wake-word-engine/Porcupine
 	cd wake-word-engine/Porcupine && tools/optimizer/linux/x86_64/pv_porcupine_optimizer -r resources/ -w "hey snowball" -p linux -o ../
 	mv "wake-word-engine/hey snowball_linux.ppn" wake-word-engine/hey_snowball_linux.ppn
 
-wake-word-engine/jni/snowball_porcupine_Porcupine.h: src/java/snowball/porcupine/Porcupine.java
+src/java/snowball/porcupine/Porcupine.class wake-word-engine/jni/snowball_porcupine_Porcupine.h: src/java/snowball/porcupine/Porcupine.java
 	mkdir -p wake-word-engine/jni
 	javac -h wake-word-engine/jni src/java/snowball/porcupine/Porcupine.java
 
