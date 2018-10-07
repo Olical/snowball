@@ -72,7 +72,7 @@
        (stream/->bytes)
        (partition 2)
        (sequence (comp (take-nth 6) (map byte-pair->short)))
-       (partition 512 512 (repeat 0))
+       (partition 512 512 (repeatedly #(- (rand-int 100) 50)))
        (map short-array)))
 
 (defn resample-for-google [byte-stream]
