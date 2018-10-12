@@ -3,7 +3,6 @@
             [clojure.core.async :as a]
             [taoensso.timbre :as log]
             [bounce.system :as b]
-            [camel-snake-kebab.core :as csk]
             [snowball.discord :as discord]
             [snowball.config :as config]
             [snowball.stream :as stream]
@@ -110,9 +109,9 @@
   (reset! extra-phrases! #{})
   (let [speech-client (.. SpeechClient (create))
         phrase-text-chan (a/chan (a/sliding-buffer 100))
-        ppn-path (str "wake-word-engine/" (csk/->snake_case (get-in config/value [:comprehension :wake-phrase])) "_linux.ppn")
-        sensitivity (get-in config/value [:comprehension :sensitivity])
-        porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv" ppn-path sensitivity)
+        porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv"
+                              "wake-word-engine/wake_phrase.ppn"
+                              (get-in config/value [:comprehension :sensitivity]))
         frame-length (.getFrameLength porcupine)
         sample-rate (.getSampleRate porcupine)
         language-code (get-in config/value [:comprehension :language-code])]

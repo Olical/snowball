@@ -12,9 +12,6 @@
                  :stream-bytes-cutoff 1000000      ;; How many bytes can we hold for any given user before we cute it into a phrase.
                  :post-wake-timeout-ms 12000       ;; How long do we wait for a user to speak after they say the wake phrase.
                  :language-code "en-GB"            ;; Language code to send to Google for comprehension. You could try en-US.
-                 :wake-phrase "hey snowball"       ;; Wake phrase for Porcupine, used to build the path to the generated ppn file.
-                                                   ;;   The ppn file is built into the container, you have to build your own
-                                                   ;;   using the repo. This config is just here to make the path easier to change.
                  :sensitivity 0.5}                 ;; Sensitivity for Porcupine between 0 and 1, where 1 is most sensitive.
 
  :speech {:cache {:bucket nil}                     ;; A bucket that the speech synthesiser can use to store pre-rendered audio for reuse.
