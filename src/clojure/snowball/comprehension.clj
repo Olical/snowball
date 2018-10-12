@@ -64,7 +64,7 @@
 ;; Notes on audio formats:
 ;; Discord provides audio as `48KHz 16bit stereo signed BigEndian PCM`.
 ;; Porcupine requires `16KHz 16bit mono signed LittleEndian PCM` but in 512 length short-array frames (a short is two bytes).
-;; GCP speech recognitionn requries the same as Porcupine but as byte pairs and without the 512 frames.
+;; GCP speech recognition requires the same as Porcupine but as byte pairs and without the 512 frames.
 
 (defn resample-for-porcupine [byte-stream]
   (->> byte-stream
