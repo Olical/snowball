@@ -71,7 +71,7 @@
        (stream/->bytes)
        (partition 2)
        (sequence (comp (take-nth 6) (map byte-pair->short)))
-       (partition 512 512 (repeatedly #(- (rand-int 100) 50)))
+       (partition 512 512 (repeat 0))
        (map short-array)))
 
 (defn resample-for-google [byte-stream]
@@ -104,23 +104,31 @@
         (vec entities)
         (recur (rest entities))))))
 
+(defn init-porcupine []
+  (let [porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv"
+                              "wake-word-engine/wake_phrase.ppn"
+                              (get-in config/value [:comprehension :sensitivity]))
+        frame-length (.getFrameLength porcupine)
+        sample-rate (.getSampleRate porcupine)]
+
+    (when (or (not= frame-length 512) (not= sample-rate 16000))
+      (throw (Error. (str "Porcupine frame length and sample rate should be 512 / 16000, got " frame-length " / " sample-rate " instead!"))))
+
+    porcupine))
+
 (b/defcomponent phrase-text-chan {:bounce/deps #{phrase-audio-chan speech/synthesiser}}
   (log/info "Starting speech to text systems")
   (reset! extra-phrases! #{})
   (let [speech-client (.. SpeechClient (create))
         phrase-text-chan (a/chan (a/sliding-buffer 100))
-        porcupine (Porcupine. "wake-word-engine/Porcupine/lib/common/porcupine_params.pv"
-                              "wake-word-engine/wake_phrase.ppn"
-                              (get-in config/value [:comprehension :sensitivity]))
-        frame-length (.getFrameLength porcupine)
-        sample-rate (.getSampleRate porcupine)
         language-code (get-in config/value [:comprehension :language-code])]
 
     (a/go-loop []
       ;; Wait for audio from a user in the voice channel.
       (when-let [{:keys [user byte-stream]} (a/<! phrase-audio-chan)]
         (try
-          (let [frames (resample-for-porcupine byte-stream)]
+          (let [porcupine (init-porcupine)
+                frames (resample-for-porcupine byte-stream)]
             ;; Check if that audio contained the wake phrase using porcupine.
             (when (some #(.processFrame porcupine %) frames)
               (let [user-name (discord/->name user)
@@ -172,16 +180,12 @@
                       (recur))
                     (do
                       (log/info user-name "didn't say anything after the wake word")
-                      (speech/say! "I didn't hear anything, please try again.")))))))
+                      (speech/say! "I didn't hear anything, please try again."))))))
+            (.delete porcupine))
           (catch Exception e
             (log/error "Caught error in phrase-text-chan loop" e)))
         (recur)))
 
-    (if (and (= frame-length 512) (= sample-rate 16000))
-      (log/info (str "Porcupine frame length is 512 samples and the sample rate is 16KHz, as expected"))
-      (throw (Error. (str "Porcupine frame length and sample rate should be 512 / 16000, got " frame-length " / " sample-rate " instead!"))))
-
     (b/with-stop phrase-text-chan
       (log/info "Shutting down speech to text systems")
-      (.shutdownNow speech-client)
-      (.delete porcupine))))
+      (.shutdownNow speech-client))))
