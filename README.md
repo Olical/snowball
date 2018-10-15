@@ -85,6 +85,7 @@ I run my instance on a Kubernetes cluster I created within GCP, I noted the step
 To give a command you need to say "hey snowball" and wait for acknowledgement, Snowball will say "hey [your name]" when it's ready. Then you can issue one of these commands. The matching is performed via regular expressions ([`snowball.command`][commands]) so you can use any sentence you want as long as the key words are present.
 
  * "say ..." - Repeats back to you whatever came after "say".
+ * "ignore me", "nevermind", "go away" etc - Sends Snowball back to sleep if it was woken accidentally.
  * "who's a good boy?" - Confirms that Snowball, is indeed, a good boy.
  * "play ..." - Sends the `!play` command to the music bot with the song name that came after "play".
  * "volume" - Any sentence with volume in it triggers volume modification.
