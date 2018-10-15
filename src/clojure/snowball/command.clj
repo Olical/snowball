@@ -131,7 +131,7 @@
               (log/info "Invalid move for users" (->names-list target-users) "to" (->name target-channel))
               (speech/say! "I need usernames and a channel name to do that."))))))
 
-    #"(ignore|no|nevermind|fuck off|go away|get lost|fuck you)"
+    #"(ignore|no|nevermind|fuck off|go away|get lost|fuck you)" :>>
     (fn [_]
       (log/info "Going back to sleep")
       (acknowledge!))
