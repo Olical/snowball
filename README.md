@@ -2,6 +2,11 @@
 
 A voice activated bot that sits in a [Discord][] server and joins audio channels with users.
 
+## Important notes
+
+ * The bot only receives audio when connected to a Discord server hosted in Central Europe. I'm not sure why yet but 99% sure it's not my code, the issue is being tracked in [#1](https://github.com/Olical/snowball/issues/1) and I have an issue open with [Discord4J](https://github.com/Discord4J/Discord4J/issues/452).
+ * Most free and easy to use music bots will ignore commands from other bots, if not all of them. I host my own [MusicBot][] which works great.
+
 ## Example
 
 This would take place entirely over voice, I'd just join a voice channel and Snowball would turn up.
