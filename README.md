@@ -47,6 +47,8 @@ This would take place entirely over voice, I'd just join a voice channel and Sno
  * Wake word detection: [Porcupine][]
  * Speech comprehension, synthesis and cache: [Google Cloud Platform][gcp]
  * Music bot: [github.com/Just-Some-Bots/MusicBot][MusicBot]
+ 
+> I wrote about how I got Porcupine working in Clojure in my post: [Wake word detection with Clojure (or Java)][wake-word-post].
 
 ## Running
 
@@ -156,3 +158,4 @@ Do what you want. Learn as much as you can. Unlicense more software.
 [cloud-storage]: https://console.cloud.google.com/storage/browser
 [kube-notes]: KUBE_NOTES.md
 [commands]: src/clojure/snowball/command.clj
+[wake-word-post]: https://oli.me.uk/2018-10-12-wake-word-detection-with-clojure-or-java/
