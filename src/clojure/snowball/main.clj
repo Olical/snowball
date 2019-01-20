@@ -1,6 +1,7 @@
 (ns snowball.main
   (:require [bounce.system :as b]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [snowball.speech :as speech]))
 
 (defn -main []
   (log/info "Starting components...")
@@ -11,4 +12,5 @@
                  'snowball.presence/poller
                  'snowball.command/dispatcher})
   (b/start!)
-  (log/info "Everything's up and running!"))
+  (log/info "Everything's up and running!")
+  (speech/say! "Connected"))
