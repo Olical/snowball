@@ -1,2 +1,1 @@
-let g:scotch_stop = "(bounce.system/stop!)"
-let g:scotch_start = "(bounce.system/start!)"
+nnoremap <localleader>rc :call conjure#connect("default", "127.0.0.1:5005", "cljc?$", "clj")<cr>

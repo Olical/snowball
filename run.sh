@@ -2,4 +2,5 @@
 
 GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/config/google.json" \
 LD_LIBRARY_PATH="wake-word-engine/jni" \
-clojure -m snowball.main
+clojure -J-Dclojure.server.snowball="{:port 5005 :accept clojure.core.server/io-prepl}" \
+        -m snowball.main 

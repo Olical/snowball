@@ -1,10 +1,7 @@
 {:paths ["src/clojure" "src/java"]
- :deps {org.clojure/clojure {:mvn/version "1.9.0"}
+ :deps {org.clojure/clojure {:mvn/version "1.10.0"}
         org.clojure/core.async {:mvn/version "0.4.474"}
-        org.clojure/tools.nrepl {:mvn/version "0.2.13"}
         org.clojure/tools.namespace {:mvn/version "0.2.11"}
-
-        cider/cider-nrepl {:mvn/version "0.18.0"}
 
         camel-snake-kebab {:mvn/version "0.4.0"}
         com.taoensso/timbre {:mvn/version "4.10.0"}
