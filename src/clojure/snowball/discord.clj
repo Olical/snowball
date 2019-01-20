@@ -19,7 +19,7 @@
       (csk/->kebab-case-keyword)))
 
 (defmulti handle-event! (fn [c] (event->keyword c)))
-(defmethod handle-event! :default [_])
+(defmethod handle-event! :default [_] nil)
 
 (declare client)
 
