@@ -3,7 +3,8 @@
             [bounce.system :as b]
             [taoensso.timbre :as log]
             [snowball.config :as config]
-            [snowball.discord :as discord]))
+            [snowball.discord :as discord]
+            [snowball.speech :as speech]))
 
 (defn allowed-to-join? [channel]
   (let [{:keys [whitelist blacklist]} (get config/value :presence)
@@ -13,7 +14,7 @@
       (seq blacklist) (not (blacklist cid))
       :default true)))
 
-(b/defcomponent poller {:bounce/deps #{discord/client config/value}}
+(b/defcomponent poller {:bounce/deps #{discord/client config/value speech/synthesiser}}
   (log/info "Starting presence poller")
   (let [closed?! (atom false)]
     (-> (a/go-loop []
@@ -34,7 +35,12 @@
                   (and (or (nil? current-channel)
                            (not (discord/has-speaking-users? current-channel)))
                        desired-channel)
-                  (discord/join! desired-channel)))
+                  (do
+                    (discord/join! desired-channel)
+
+                    ;; This hack gets around a bug in Discord's API.
+                    ;; You need to send some audio to start receiving audio.
+                    (speech/say! ""))))
               (catch Exception e
                 (log/error "Caught an error in presence loop" e)))
             (recur)))
