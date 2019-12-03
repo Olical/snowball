@@ -1,3 +1,5 @@
+> WARNING: This repository is unmaintained, it worked last time I was running it though. If it works for you, then yay! If it doesn't I won't really be able to help you out, I have far too much to do when I'm not at work these days. You're free to do whatever you want with the code, but I won't be able to support you. Good luck!
+
 # Snowball
 
 A voice activated bot that sits in a [Discord][] server and joins audio channels with users.
